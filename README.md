@@ -50,6 +50,34 @@ Project records live in `.codex/visual-builder/`; installer receipts, progress, 
 - A desktop session for visible capture browsers. The installer checks Chromium and downloads it through Playwright when missing; first setup may need internet access.
 - Windows is not supported by the Python installer in this release.
 
+### Quick installation prompt
+
+Open your target project in your coding agent and paste this prompt. GitHub access
+to this repository and the requirements above are needed. The package is installed
+from a locally built archive; it is not yet published to npm.
+
+```text
+Install Runtime Controller into the project currently open in this workspace.
+Record its absolute path before changing directories. Clone
+https://github.com/gopalcb/agent-runtime-controller.git from main into a separate
+sibling folder, or reuse a clean checkout without overwriting local changes.
+Read its README installation instructions and verify Node 22.13+, Python 3.11+
+and npm. In the controller checkout, run npm ci, npm --prefix frontend ci,
+and npm pack to build the installable archive.
+
+In the original target project, preserve existing package settings and overrides,
+add overrides.multer=2.5.0 (report any conflicting override), and install the
+generated .tgz with npm install --save-dev using its absolute path. Preserve
+existing .codex files, credentials and memory. Let the Python installer complete
+project setup; if lifecycle scripts are disabled, run
+npx runtime-controller setup --project "<absolute target project path>".
+
+Open http://127.0.0.1:10101/controller/install, ensure the intended project is
+selected, and verify Installation complete before reporting success. If another
+project is already active, use Settings to select the target before setup.
+Report the controller URL and any blockers. Do not start an agent work item.
+```
+
 ### Clone, build and run
 
 ```bash
