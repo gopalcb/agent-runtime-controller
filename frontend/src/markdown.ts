@@ -8,11 +8,12 @@ function inline(text: string): string {
 }
 export function renderMarkdown(source: string): string {
   const lines = source.replace(/\r/g,'').split('\n');
-  let html = '', code: string[] | null = null, list = '';
+  let html = '', code: string[] | null = null, language = '', list = '';
+  const codeBlock = () => `<pre${language === 'mermaid' ? ' class="mermaid-source"' : ''}><code>${escape(code!.join('\n'))}</code></pre>`;
   const closeList = () => { if (list) html += `</${list}>`; list = ''; };
   for (let i=0;i<lines.length;i++) {
     const line = lines[i];
-    if (/^\s*```/.test(line)) { closeList(); if (code) {html += `<pre><code>${escape(code.join('\n'))}</code></pre>`;code=null;} else code=[]; continue; }
+    if (/^\s*```/.test(line)) { closeList(); if (code) {html += codeBlock();code=null;} else {code=[];language=line.trim().slice(3).trim().split(/\s/)[0].toLowerCase();} continue; }
     if (code) {code.push(line);continue;}
     const heading = /^(#{1,6})\s+(.+)$/.exec(line);
     if (heading) {closeList();html += `<h${heading[1].length}>${inline(heading[2])}</h${heading[1].length}>`;continue;}
@@ -29,6 +30,6 @@ export function renderMarkdown(source: string): string {
     else if (/^\s*---+\s*$/.test(line)) html+='<hr>';
     else if (line.trim()) html+=`<p>${inline(line)}</p>`;
   }
-  closeList();if(code)html+=`<pre><code>${escape(code.join('\n'))}</code></pre>`;
+  closeList();if(code)html+=codeBlock();
   return html;
 }

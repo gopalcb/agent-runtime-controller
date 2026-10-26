@@ -30,7 +30,7 @@
     "postinstall": "node bin/postinstall.cjs",
     "setup": "node bin/visual-agent-builder.cjs setup",
     "test:installer": "python3 -m unittest discover -s tests -p \"test_installer.py\"",
-    "test:ui": "node tests/browser.smoke.cjs && node tests/controller.smoke.cjs && node tests/visual-instructions.smoke.cjs",
+    "test:ui": "node tests/browser.smoke.cjs && node tests/controller.smoke.cjs && node tests/visual-instructions.smoke.cjs && node tests/mermaid.smoke.cjs",
     "format:backend": "prettier --write \"backend/**/*.ts\"",
     "format:backend:check": "prettier --check \"backend/**/*.ts\""
   },

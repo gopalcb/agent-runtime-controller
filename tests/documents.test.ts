@@ -22,3 +22,13 @@ test('Markdown formats readable blocks while leaving HTML and unsafe links inert
  const html=renderMarkdown('# Plan\n- [x] Done\n\n| Task | Result |\n| --- | --- |\n| A | Pass |\n\n```js\n<script>bad()</script>\n```\n<img src=x onerror=bad()>\n[bad](javascript:bad)\n[good](https://example.com)');
  assert.match(html,/<h1>Plan<\/h1>/);assert.match(html,/<table>/);assert.match(html,/☑ Done/);assert.match(html,/&lt;script&gt;/);assert.doesNotMatch(html,/<script|<img|href="javascript/);assert.match(html,/rel="noopener noreferrer"/);
 });
+
+test('Markdown preserves Mermaid fences as escaped render targets and keeps other code plain', () => {
+ const html=renderMarkdown('```mermaid\nflowchart LR\n A["<script>unsafe()</script>"] --> B\n```\n\n```ts\nconst value = "<b>code</b>";\n```');
+ assert.equal((html.match(/class="mermaid-source"/g)||[]).length,1);
+ assert.match(html,/&lt;script&gt;unsafe\(\)&lt;\/script&gt;/);
+ assert.match(html,/<pre><code>const value =/);
+ assert.doesNotMatch(html,/<script|<b>/);
+ assert.match(renderMarkdown('```MERMAID\ngraph LR\n A-->B'),/class="mermaid-source"/);
+ assert.doesNotMatch(renderMarkdown('```mermaid-unknown\nA-->B\n```'),/class="mermaid-source"/);
+});

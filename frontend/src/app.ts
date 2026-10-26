@@ -1,4 +1,5 @@
 import { renderMarkdown } from './markdown';
+import { renderMermaidBlocks } from './mermaid';
 import { Component, HostListener, computed, signal, OnDestroy, afterEveryRender, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -149,6 +150,7 @@ export class AppComponent implements OnDestroy {
 
 
   @ViewChild('terminal') terminal?: ElementRef<HTMLElement>;
+  @ViewChild('documentBody') documentBody?: ElementRef<HTMLElement>;
   readonly followOutput = signal(true);
   private lastOutput = '';
   readonly liveOutput = computed(() => {
@@ -215,7 +217,10 @@ export class AppComponent implements OnDestroy {
 
   constructor() {
     // Scroll after Angular has rendered the latest output into the conditional terminal.
-    afterEveryRender(() => this.scrollOutput());
+    afterEveryRender(() => {
+      this.scrollOutput();
+      if (this.documentBody) renderMermaidBlocks(this.documentBody.nativeElement);
+    });
     history.replaceState({}, '', this.canvas ? '/controller/canvas' : this.route(this.page()));
     void this.refresh(true);
     this.timer = setInterval(() => void this.refresh(), 2000);

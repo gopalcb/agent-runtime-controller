@@ -30,7 +30,6 @@ The API serves the compiled UI and owns one selected project at a time. Switchin
 | Agent Runtime | `/controller/agent-runtime` | Pending work, capture and execution |
 | Work Docs | `/controller/work-docs` | Search and read project Markdown plans and documentation |
 | Run History | `/controller/history` | Completed work items and agent runs |
-| Work Docs | `/controller/work-docs` | Project Markdown with page scrolling |
 | Settings | `/controller/settings` | Selected-project execution settings |
 | Observability | `/controller/observability` | Health, logs and recorded token usage |
 | Installation | `/controller/install` | Progress, retry, reinstall and reset |
@@ -189,6 +188,6 @@ For frontend development, start the API explicitly on port 4310 (`npm start -- -
 
 The Git ignore file excludes dependencies, build output, archives, local `.codex`/`.agents` state, secrets and test artifacts. The portable `runtime-template/.codex` is intentionally tracked. Inspect staged files before the first commit. This repository is marked **UNLICENSED**; choose distribution terms before publishing. Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Work Docs lists Markdown at the project root and under `docs/`, `plans/`, `.codex/tasks/`, and `.codex/plans/`, newest first. Refresh to discover files created during a run. Files have no agent-author attribution. The reader formats common Markdown and treats embedded HTML as text. Discovery excludes symlinks, dependency folders and other hidden directories, caps traversal at 5,000 entries/depth 8 and the list at 500 documents; files over 512 KiB are excluded.
+Work Docs lists Markdown at the project root and under `docs/`, `plans/`, `.codex/tasks/`, and `.codex/plans/`, newest first. Refresh to discover files created during a run. Files have no agent-author attribution. The reader formats common Markdown and treats embedded HTML as text. Fenced `mermaid` diagrams render locally with an expandable source view. Invalid diagrams, HTML labels, and diagrams over 50,000 characters retain their source with an error message. Discovery excludes symlinks, dependency folders and other hidden directories, caps traversal at 5,000 entries/depth 8 and the list at 500 documents; files over 512 KiB are excluded.
 
 Active execution appears above Work Items in a fixed-height terminal. New output arrives at the bottom and auto-scrolls; pause auto-scroll to read earlier output. Finished output remains in Run History. Project selection and runtime setup are available from page actions.

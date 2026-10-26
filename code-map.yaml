@@ -39,3 +39,5 @@ components:
     responsibility: Self-contained browser selection and instruction editor
   - path: backend/reference.ts
     responsibility: Local URL and captured element evidence validation
+  - path: frontend/src/mermaid.ts
+    responsibility: Lazy Mermaid rendering, safe image display and source fallback
