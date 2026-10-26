@@ -2,7 +2,9 @@
 
 [System architecture](#system-architecture) · [Installation](#installation)
 
-A local Angular + NestJS development plugin. Draw a layout or select an element in a running local app, save instructions, and execute selected work items with Codex in the selected project.
+Runtime Controller turns visual feedback into work that a coding agent can act on. Draw a layout or point to an element in your local app, describe what should change, and choose which items Codex should implement. The controller keeps the instructions, execution history and settings with the project.
+
+It is an npm development package with an Angular interface, a NestJS API and a Python installer. It runs on your machine and connects to your installed Codex CLI.
 
 ## System architecture
 
@@ -23,7 +25,73 @@ flowchart LR
   Runtime --> Memory[Project-owned memory notes]
 ```
 
-The API serves the compiled UI and owns one selected project at a time. Switching folders loads that project's work items, history, settings and installation state, closes owned browsers, and rotates the mutation token. Active execution or installation blocks switching. Stale browser tabs must reload the current project before writing.
+### From a visual idea to a code change
+
+1. **Capture the change.** Open a blank canvas to describe a new layout, or open a local URL to select an existing element. Save a description alongside the rectangle or element reference.
+2. **Choose the work.** Review the saved items, select the ones to implement and confirm execution. The backend takes a snapshot so later edits cannot change a run's original inputs.
+3. **Run Codex in the project.** The NestJS API hands the work to a TypeScript runtime. It starts a local Codex app-server, creates a thread with the project's working directory, and submits the saved instructions as a turn.
+4. **Review the result.** The runtime records agent messages, status and reported token usage. Angular polls the local API every two seconds. A finished agent turn marks its items complete; review the changed files and checks before accepting the work.
+
+The browser talks to the local API, not directly to a model endpoint. The Codex adapter uses Node's child-process and readline APIs to exchange newline-delimited JSON-RPC with `codex app-server`. There is no separate agent SDK in this implementation.
+
+One controller has one active project at a time. Switching in Settings loads that project's records and closes capture browsers from the previous project. Switching is blocked during execution or installation. Project IDs and a rotating mutation token prevent an old browser tab from writing to a newly selected project.
+
+### What each part does
+
+| Part | Implementation | Responsibility |
+| --- | --- | --- |
+| Controller UI | Angular, TypeScript, RxJS | Capture forms, work selection, installation progress and run views |
+| Local API | NestJS on Express | Validate requests and route them to the active project |
+| Agent runtime | TypeScript and Node child processes | Freeze work inputs, start Codex, process notices and handle cancellation |
+| Visual capture | Playwright | Open an owned browser for rectangle drawing or local element selection |
+| Installation | Python standard library | Check prerequisites, copy the runtime template and track file ownership |
+| Work Docs | Markdown formatter, Mermaid and DOMPurify | Read project documents and render diagrams locally |
+| Icons | Bootstrap Icons | Locally bundled interface icons |
+
+### Your project after installation
+
+This is a representative layout after installing the package and starting the controller. Existing application folders remain in place. Runtime state and lock files appear as needed; names ending in `/` are directories.
+
+```text
+your-project/
+├── src/                              Your existing application
+├── package.json                      Development dependency and package settings
+├── AGENTS.md                         Bridge added only when this file is absent
+├── node_modules/@gb-systems/
+│   └── visual-agent-builder/         Installed package; CLI name: runtime-controller
+│       ├── bin/                      npm lifecycle and command entry points
+│       ├── dist/                     Compiled NestJS API and TypeScript runtime
+│       ├── frontend/dist/            Compiled Angular UI
+│       ├── installer/                Python setup and launcher modules
+│       └── runtime-template/         Reviewed, portable runtime files
+├── .agents/skills/                   Discoverable copies of packaged skills
+└── .codex/
+    ├── AGENTS.md                     Project runtime guidance
+    ├── agents/                       Optional role definitions
+    ├── skills/                       Planning, implementation and testing guidance
+    ├── workflows/                    Development, checkpoint and memory procedures
+    ├── references/                   Supporting task-record conventions
+    ├── assets/templates/            Project configuration template
+    ├── tools/                       Logging, UI verification and memory utilities
+    ├── visual-builder/
+    │   ├── AGENTS.md                 Instructions for controller-owned runs
+    │   ├── state.json                Work items, runs, settings and activity
+    │   └── owner.lock                Present while a process owns this project
+    └── runtime-controller/
+        ├── install.json              Installation steps and current status
+        ├── managed.json              Hashes of installer-owned files
+        ├── launcher.json             Package location and controller port
+        ├── codex.py                  Explicit controller-aware Codex launcher
+        ├── projects.json             Registry in the controller's initial project
+        ├── conflicts/                Incoming files when local edits must be kept
+        └── memory/                   Project-owned notes, index and usage guide
+```
+
+The package contains the executable application; the project's `.codex` folder contains guidance and local records. This separation lets the same controller work with different projects without mixing their work history.
+
+The installer checks file hashes before replacing anything it owns. Existing instructions and user edits are preserved, with incoming versions offered as conflicts. It does not copy native Codex credentials, private memory or sessions. Project memory is an explicit notes tool: it does not automatically remember every conversation. See [template contents](runtime-template/README.md) and [installer details](installer/ARCHITECTURE.md).
+
+### Find your way around
 
 | Page | Route | Purpose |
 | --- | --- | --- |
@@ -35,11 +103,12 @@ The API serves the compiled UI and owns one selected project at a time. Switchin
 | Installation | `/controller/install` | Progress, retry, reinstall and reset |
 | Drawing canvas | `/controller/canvas` | Rectangle instructions |
 
-**Settings** contains **Select project** and the **Runtime installed / Runtime setup** entry. Work Docs uses a wider desktop file list and lets long documents scroll with the page.
+Use **Settings** to select a project or open its runtime setup. **Work Docs** reads project Markdown with normal page scrolling and expandable Mermaid diagram source.
 
 **Add interactive work items** opens a choice between a blank drawing canvas and an existing local URL. Draw a rectangle or highlight an element, describe the change, and save. Select pending items and confirm execution. Completed items move to Run History; unresolved work remains visible separately. A completed Codex turn is not a guarantee that its code is correct: review the output and validation.
 
-Project records live in `.codex/visual-builder/`; installer receipts, progress, project registry and memory live in `.codex/runtime-controller/`. The packaged template contains reusable instructions, five role definitions, five skills, workflows, activity logging, UI-testing helpers and a memory CLI. It deliberately excludes GB Systems credentials, account configuration, private memories, sessions, caches, domain-specific projects and installed third-party plugins. See [template provenance](runtime-template/README.md) and [installer architecture](installer/ARCHITECTURE.md).
+
+For a standalone explanation with code excerpts and a demo placeholder, open the [portfolio article](docs/portfolio/runtime-controller.html) in a browser.
 
 ## Installation
 
@@ -49,6 +118,34 @@ Project records live in `.codex/visual-builder/`; installer receipts, progress, 
 - An installed and authenticated `codex` CLI for execution. Installation can finish without authentication; **CLI available** only reports executable availability.
 - A desktop session for visible capture browsers. The installer checks Chromium and downloads it through Playwright when missing; first setup may need internet access.
 - Windows is not supported by the Python installer in this release.
+
+### Quick installation prompt
+
+Open your target project in your coding agent and paste this prompt. GitHub access
+to this repository and the requirements above are needed. The package is installed
+from a locally built archive; it is not yet published to npm.
+
+```text
+Install Runtime Controller into the project currently open in this workspace.
+Record its absolute path before changing directories. Clone
+https://github.com/gopalcb/agent-runtime-controller.git from main into a separate
+sibling folder, or reuse a clean checkout without overwriting local changes.
+Read its README installation instructions and verify Node 22.13+, Python 3.11+
+and npm. In the controller checkout, run npm ci, npm --prefix frontend ci,
+and npm pack to build the installable archive.
+
+In the original target project, preserve existing package settings and overrides,
+add overrides.multer=2.5.0 (report any conflicting override), and install the
+generated .tgz with npm install --save-dev using its absolute path. Preserve
+existing .codex files, credentials and memory. Let the Python installer complete
+project setup; if lifecycle scripts are disabled, run
+npx runtime-controller setup --project "<absolute target project path>".
+
+Open http://127.0.0.1:10101/controller/install, ensure the intended project is
+selected, and verify Installation complete before reporting success. If another
+project is already active, use Settings to select the target before setup.
+Report the controller URL and any blockers. Do not start an agent work item.
+```
 
 ### Clone, build and run
 
@@ -114,9 +211,9 @@ sequenceDiagram
   C->>C: Enable execution and reset/reinstall
 ```
 
-### Requested hostname: localhost.runtime-controller:1001
+### Optional local hostname
 
-On systems that permit it, start with `npx runtime-controller --project "$PWD" --port 1001` and configure the hostname to resolve to loopback. This Mac rejects unprivileged port 1001 and does not resolve the hostname automatically. The supported helper keeps the controller unprivileged on port 10101 and forwards the requested address:
+The default setup URL is **http://127.0.0.1:10101/controller/install**. To use **http://localhost.runtime-controller:1001**, the hostname must resolve to loopback and port 1001 must be available. Systems that restrict low-numbered ports need an administrator-managed forwarder. The helper keeps the controller unprivileged on port 10101:
 
 ```bash
 # First start setup/controller on 10101 as your normal user.
@@ -175,7 +272,6 @@ npm test
 npm run test:installer
 npm run build
 npm run test:ui
-node tests/controller.smoke.cjs
 python3 scripts/export-runtime-template.py --check
 npm audit --omit=dev
 npm --prefix frontend audit
@@ -190,4 +286,4 @@ The Git ignore file excludes dependencies, build output, archives, local `.codex
 
 Work Docs lists Markdown at the project root and under `docs/`, `plans/`, `.codex/tasks/`, and `.codex/plans/`, newest first. Refresh to discover files created during a run. Files have no agent-author attribution. The reader formats common Markdown and treats embedded HTML as text. Fenced `mermaid` diagrams render locally with an expandable source view. Invalid diagrams, HTML labels, and diagrams over 50,000 characters retain their source with an error message. Discovery excludes symlinks, dependency folders and other hidden directories, caps traversal at 5,000 entries/depth 8 and the list at 500 documents; files over 512 KiB are excluded.
 
-Active execution appears above Work Items in a fixed-height terminal. New output arrives at the bottom and auto-scrolls; pause auto-scroll to read earlier output. Finished output remains in Run History. Project selection and runtime setup are available from page actions.
+Active execution appears above Work Items in a fixed-height terminal. New output arrives at the bottom and auto-scrolls; pause auto-scroll to read earlier output. Finished output remains in Run History. Project selection and runtime setup are available only in Settings.
