@@ -57,13 +57,6 @@ your-project/
 ├── src/                              Your existing application
 ├── package.json                      Development dependency and package settings
 ├── AGENTS.md                         Bridge added only when this file is absent
-├── node_modules/@gb-systems/
-│   └── visual-agent-builder/         Installed package; CLI name: runtime-controller
-│       ├── bin/                      npm lifecycle and command entry points
-│       ├── dist/                     Compiled NestJS API and TypeScript runtime
-│       ├── frontend/dist/            Compiled Angular UI
-│       ├── installer/                Python setup and launcher modules
-│       └── runtime-template/         Reviewed, portable runtime files
 ├── .agents/skills/                   Discoverable copies of packaged skills
 └── .codex/
     ├── AGENTS.md                     Project runtime guidance
