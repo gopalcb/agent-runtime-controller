@@ -1,0 +1,15 @@
+# Runtime Controller architecture
+
+The current architecture and installation sequences are in the [README](../README.md#system-architecture). Python lifecycle details and safety boundaries are in [installer/ARCHITECTURE.md](../installer/ARCHITECTURE.md); portable payload provenance is in [runtime-template/README.md](../runtime-template/README.md).
+
+`backend/projects.ts` owns the selected project session and token rotation. Each session owns storage, Codex transport, two browser controllers and an installation worker. `backend/main.ts` assembles NestJS and owns startup/shutdown. `backend/routing.ts` declares API and Angular routes and applies loopback Host/Origin/token checks before request parsing. Switching closes the previous session before publishing the new one and rejects switches during active execution or installation.
+
+`frontend/src/app.ts` clears project-specific drafts and selection on context changes and rejects stale polling results. Canonical pages live under `/controller/`; captured work remains in project-local persistence. Python bootstrap validates HTTP identity before reporting startup readiness. The project launcher preserves native authentication and points portable tooling at its separate project runtime directory.
+
+`backend/documents.ts` provides bounded, read-only Markdown discovery and content access in the selected project. Document reads use the existing project identity guard; Angular discards responses from prior project epochs and superseded file selections. `frontend/src/markdown.ts` escapes source HTML before formatting common Markdown; Angular retains its default HTML sanitization.
+
+Backend flow is deliberately direct: `main` creates `Projects`, registers `routing`, then listens. Routes resolve the current session on every request. The session delegates persistence to `store`, agent execution to `runtime`/`codex`, capture to `browser`/`live-browser`, and deployment to `installation`. Storage and the project registry share `state-file.writeJsonAtomic`; each caller retains its own path and existing-file safety checks. Failed temporary writes are removed without replacing previous data.
+
+Codex transport owns pending RPC cleanup and reports unexpected disconnects separately from explicit shutdown. Runtime uses sets for selected-work membership while retaining saved ordering and immutable run snapshots. Approval methods and shared thread/turn settings are defined once. The live overlay must remain self-contained because Playwright serializes its function into another browser context; its style-key allowlist is intentionally repeated at the browser/server boundary.
+
+Backend formatting uses two spaces, single quotes and a 100-column target. Run `npm run format:backend` and `npm run format:backend:check`. Keep blank lines between workflow phases, concise purpose comments on meaningful operations, and domain-specific names. Reduce duplicated logic rather than compressing multiple statements onto one line. Protocol payloads remain dynamic where the external JSON-RPC schema is not modeled; persistence/API types stay explicit.

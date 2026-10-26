@@ -1,0 +1,405 @@
+{
+  "version": "0.2.0",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "8db0228682194e0b566e7af9907e4cf2a8df8a1a4916a8993f77e1208a9fbdb7",
+      "bytes": 7076,
+      "provenance": {
+        "source": ".codex/AGENTS.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "agents/builder-agent.toml",
+      "sha256": "70a52223de332aa212daf6e415d51b1db16f3426101bf556d2dd85dfbbaf19df",
+      "bytes": 848,
+      "provenance": {
+        "source": ".codex/agents/builder-agent.toml",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "agents/high-effort.toml",
+      "sha256": "759bff02b45e200cc6f075d6537f052b499ab340f39cde46039bd7cc6f3bded4",
+      "bytes": 1471,
+      "provenance": {
+        "source": ".codex/agents/high-effort.toml",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "agents/low-effort.toml",
+      "sha256": "719ecd4b0d90e6f7e90d530abab5fbf2a1cca5a4bce0f1e5f3a3d20c19216765",
+      "bytes": 1049,
+      "provenance": {
+        "source": ".codex/agents/low-effort.toml",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "agents/medium-effort.toml",
+      "sha256": "98021148f4af053e35ab0dac6118a78620ce96b7b43c20d7e5c3ae92c8bbdc2c",
+      "bytes": 1350,
+      "provenance": {
+        "source": ".codex/agents/medium-effort.toml",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "agents/planner-agent.toml",
+      "sha256": "a9dd4ad0b97ea20be729cd3de97c460dc2a8040aff386cdb7098bf5d42d9bb79",
+      "bytes": 713,
+      "provenance": {
+        "source": ".codex/agents/planner-agent.toml",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "assets/templates/project.toml",
+      "sha256": "d05a6a092f5029e7fb39408fead5f00e2f19566d38ce7e45671e823bcb6c3b7e",
+      "bytes": 1345,
+      "provenance": {
+        "source": ".codex/assets/templates/project.toml",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "references/task-records.md",
+      "sha256": "bd5362ade6a96b2827be93601389b16c39c3487ac4b28f0fbbafb2ef89a69440",
+      "bytes": 1545,
+      "provenance": {
+        "source": ".codex/references/task-records.md",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "skills/computer-use/SKILL.md",
+      "sha256": "2079334b8e4329bd12eb30719198146f8f844605ca3c354410315d2a39688d4e",
+      "bytes": 6216,
+      "provenance": {
+        "source": ".codex/skills/computer-use/SKILL.md",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "skills/implement-development/SKILL.md",
+      "sha256": "2f3a3b89e543fd84e40cac87d5844e27af08717ab890020e6ebaf43fb5e231ec",
+      "bytes": 3433,
+      "provenance": {
+        "source": ".codex/skills/implement-development/SKILL.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "skills/plan-development/SKILL.md",
+      "sha256": "24db56f14d4763a3fa215ea9fb5f2f4dd79dcb86c679f20b55fab1951b02ca59",
+      "bytes": 2673,
+      "provenance": {
+        "source": ".codex/skills/plan-development/SKILL.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "skills/python-development/SKILL.md",
+      "sha256": "2248457a64655ea8831081ad63dd2cd99ba06ccbd51813ed1f05dbf1c3ffb188",
+      "bytes": 21856,
+      "provenance": {
+        "source": ".codex/skills/python-development/SKILL.md",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "skills/ui-testing-and-debugging/SKILL.md",
+      "sha256": "ce96c10a148cee07a48e00cdafd20bcabbadf475fa939bffaae9c1144d14d295",
+      "bytes": 1364,
+      "provenance": {
+        "source": ".codex/skills/ui-testing-and-debugging/SKILL.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/project_memory/ARCHITECTURE.md",
+      "sha256": "24758195bce3d399f9a30ebe6be885b5ec03798237b556199fa631042f68c9b0",
+      "bytes": 954,
+      "provenance": {
+        "source": "runtime-template/.codex/tools/project_memory/ARCHITECTURE.md",
+        "kind": "authored",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/project_memory/README.md",
+      "sha256": "67cd387f2ba92336b1b55e20289209a96ae4ef7d707a9c5ef557f53a62825d62",
+      "bytes": 2603,
+      "provenance": {
+        "source": "runtime-template/.codex/tools/project_memory/README.md",
+        "kind": "authored",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/project_memory/code-map.yaml",
+      "sha256": "c98cd8015aa811cabe244b6b690c814f1a57bb94e321f62a72516b5ed2ab9dba",
+      "bytes": 1550,
+      "provenance": {
+        "source": "runtime-template/.codex/tools/project_memory/code-map.yaml",
+        "kind": "authored",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/project_memory/memory.py",
+      "sha256": "9d1bddfdf5cb4d0fbf7d8fc1b1c5d21802ae928728098c42ab059fe598199c96",
+      "bytes": 7170,
+      "provenance": {
+        "source": "runtime-template/.codex/tools/project_memory/memory.py",
+        "kind": "authored",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/project_memory/test_memory.py",
+      "sha256": "7770cf1717ecd0c76db0d8e2daafb006ce620e0a3da62f89efcfcb34f3f54219",
+      "bytes": 7138,
+      "provenance": {
+        "source": "runtime-template/.codex/tools/project_memory/test_memory.py",
+        "kind": "authored",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/runtime_logger/README.md",
+      "sha256": "195ff1949269d3406f5d9207346fb5474e0c326c0186a22b1de13adc9cfe5126",
+      "bytes": 2582,
+      "provenance": {
+        "source": ".codex/tools/runtime_logger/README.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/runtime_logger/__init__.py",
+      "sha256": "c558a894c64cd140c7c286a31259608a6f26df6e47d42df04a2155ca0ef4510d",
+      "bytes": 66,
+      "provenance": {
+        "source": ".codex/tools/runtime_logger/__init__.py",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/runtime_logger/runtime_logger.py",
+      "sha256": "1843a9c762a16c6d107b66da68bc16252c51a7a356929e3dc213d9b421051fe6",
+      "bytes": 4099,
+      "provenance": {
+        "source": ".codex/tools/runtime_logger/runtime_logger.py",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/README.md",
+      "sha256": "af1297537778d41dc5daa7e9c352f57da2ee9a5940ca44bdd138679dec99fe49",
+      "bytes": 3260,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/README.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/cli.mjs",
+      "sha256": "a5d6f0360df78bbf5aec5a6f95d8160209cbb96c07236fd73c29cfb864361683",
+      "bytes": 3594,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/cli.mjs",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/docs/debugging.md",
+      "sha256": "835546c82758846ba1dbaa0efd733c644b373727b39cccfed179900c54e1b141",
+      "bytes": 3888,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/docs/debugging.md",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/docs/pointer.md",
+      "sha256": "605d8ff3d22d56c8b427076c6b8a2bd74524984781ac48928c7da82aedcbc0fc",
+      "bytes": 2598,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/docs/pointer.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/docs/requirements.md",
+      "sha256": "f160ea762a1e33556954e8385d4d5f3c88a3d9b0d50cccaae77b14db8c235a06",
+      "bytes": 1943,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/docs/requirements.md",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/docs/testing.md",
+      "sha256": "db99eff37895c5a5b7bfc910704ff6a3a1d20322ccc8a5d972245113d12f70c8",
+      "bytes": 3576,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/docs/testing.md",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/pointer/PointerOverlay.swift",
+      "sha256": "8dfe0ffe79c1efff467edcb800ab144262e90c594341e18a4c874d6ce762ceff",
+      "bytes": 7751,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/pointer/PointerOverlay.swift",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/pointer/mcp-proxy.mjs",
+      "sha256": "87175e9ec498f2c1ff215101aaa963bd0d821a072726097605ce85b1ff6684fe",
+      "bytes": 7055,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/pointer/mcp-proxy.mjs",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/pointer/pointer.mjs",
+      "sha256": "665b7654f418a3fda6f7784e92ee2de6f5bd0d63764513ab7ba250989ed6c3bd",
+      "bytes": 3005,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/pointer/pointer.mjs",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/pointer/pointer.test.mjs",
+      "sha256": "aff6ed9a536d5762c2ef1b1eacf9ab64ec9d6a620aa0d07c66a45267162d1126",
+      "bytes": 2899,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/pointer/pointer.test.mjs",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/templates/cycle.json",
+      "sha256": "9efc1c3b254097a6fe27b58f9f2a595164338e0be6b3b52d91c1c091d83eb598",
+      "bytes": 321,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/templates/cycle.json",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/templates/requirements.json",
+      "sha256": "e3017dabccffe9e2bc4e1a1a64d7206f95cdbec1de86fd8dac56801657d59c3f",
+      "bytes": 1509,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/templates/requirements.json",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/tests/tool.test.mjs",
+      "sha256": "d705295bdd85151c5d0cec8b481954c8759d2286d15caeb0d559741d4991f557",
+      "bytes": 4616,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/tests/tool.test.mjs",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/ui-testing-and-debugging/validation.mjs",
+      "sha256": "c6fb008f90f66dba07acea29464f92adaef0ff7d29b9fecfff12368ae9ea81b1",
+      "bytes": 4561,
+      "provenance": {
+        "source": ".codex/tools/ui-testing-and-debugging/validation.mjs",
+        "kind": "audited-copy",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "workflows/checkpoint.md",
+      "sha256": "437c310ff5e30b4fc7c82842007b65e2e1d5fdbc09a1cec2266377aab9b7a0d6",
+      "bytes": 1790,
+      "provenance": {
+        "source": ".codex/workflows/checkpoint.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "workflows/development.md",
+      "sha256": "cefa4c79d8ab2fabc8694be528c8d592f08f8b04653b516924e93af08ed8f2bb",
+      "bytes": 6616,
+      "provenance": {
+        "source": ".codex/workflows/development.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "workflows/memory.md",
+      "sha256": "d269688fefe749070aa2610eb81f10c4c9679bd1dbcce69a99047a394d6e5ae8",
+      "bytes": 1837,
+      "provenance": {
+        "source": "runtime-template/.codex/workflows/memory.md",
+        "kind": "authored",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "workflows/ui-testing.md",
+      "sha256": "d0cbc33dc1989abf5bd7ea7d36a923fb7a888ce61a274fecc0a11feb6b9e550f",
+      "bytes": 993,
+      "provenance": {
+        "source": ".codex/workflows/ui-testing.md",
+        "kind": "adapted",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    }
+  ],
+  "exclusions": [
+    "Account config.toml, auth.json, hooks.json, credentials, environment and secrets",
+    "Native memories, sessions, history, databases, logs, caches and plugin installs",
+    "Private task records, screenshots, browser profiles and generated artifacts",
+    "Domain-specific Glue/AWS/portfolio workflows, tools and skills",
+    "Duplicate hashed agent/skill registrations and account-specific model routing",
+    "Native Computer Use binaries, MCP configuration and historical hook commands",
+    "External ~/.agents context skills: redistribution provenance not established",
+    "Existing memory notes: installer creates only a plugin-owned empty scaffold"
+  ]
+}

@@ -1,10 +1,34 @@
-.venv/
-.agent-state/
+# Local dependencies and generated builds
+node_modules/
+/dist/
+/frontend/dist/
+/frontend/.angular/
+coverage/
+*.tgz
+*.tsbuildinfo
+# Project-specific Codex state, credentials, instructions deployed by setup
+/.codex/
+/.agents/
+# Local implementation records can contain captured project content and paths
+/docs/tasks/
+/artifacts/
+/test-results/
+/playwright-report/
+# Python and operating-system artifacts
 __pycache__/
 *.py[cod]
-*.pyc
-.pytest_cache/
+.venv/
+venv/
+.DS_Store
+# Runtime/environment data
 .env
 .env.*
 !.env.example
-.DS_Store
+*.log
+*.sqlite*
+*.db
+*.pid
+
+# Legacy runtime and Python test state
+.agent-state/
+.pytest_cache/

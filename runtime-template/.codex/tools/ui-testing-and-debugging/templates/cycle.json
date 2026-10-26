@@ -1,0 +1,9 @@
+{
+  "driver": "computer-use",
+  "revision": "TODO exact requirements appRevision",
+  "observedAt": "TODO ISO timestamp",
+  "openDefects": [],
+  "results": [
+    {"scenario":"layout","viewport":"desktop","status":"BLOCKED","actual":"TODO observed result or blocker and recovery","evidence":["artifacts/desktop.md"]}
+  ]
+}

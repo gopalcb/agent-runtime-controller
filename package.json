@@ -1,0 +1,64 @@
+{
+  "name": "@gb-systems/visual-agent-builder",
+  "version": "0.2.0",
+  "description": "Runtime Controller: project-scoped visual work items, Codex runtime and portable setup",
+  "license": "UNLICENSED",
+  "bin": {
+    "visual-agent-builder": "bin/visual-agent-builder.cjs",
+    "runtime-controller": "bin/visual-agent-builder.cjs"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "frontend/dist",
+    "installer",
+    "runtime-template",
+    "scripts/export-runtime-template.py",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "build:api": "tsc -p tsconfig.json",
+    "build": "npm run build:api && npm --prefix frontend run build",
+    "start": "node bin/visual-agent-builder.cjs",
+    "test": "npm run build:api && tsx --test tests/*.test.ts",
+    "prepack": "npm run build",
+    "browser:install": "playwright install chromium",
+    "postinstall": "node bin/postinstall.cjs",
+    "setup": "node bin/visual-agent-builder.cjs setup",
+    "test:installer": "python3 -m unittest discover -s tests -p \"test_installer.py\"",
+    "test:ui": "node tests/browser.smoke.cjs && node tests/controller.smoke.cjs && node tests/visual-instructions.smoke.cjs",
+    "format:backend": "prettier --write \"backend/**/*.ts\"",
+    "format:backend:check": "prettier --check \"backend/**/*.ts\""
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "express": "^5.1.0",
+    "playwright": "^1.56.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "prettier": "3.9.10",
+    "tsx": "^4.20.6",
+    "typescript": "~5.9.3"
+  },
+  "overrides": {
+    "multer": "2.5.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gopalcb/agent-runtime-controller.git"
+  },
+  "homepage": "https://github.com/gopalcb/agent-runtime-controller#readme",
+  "bugs": {
+    "url": "https://github.com/gopalcb/agent-runtime-controller/issues"
+  }
+}

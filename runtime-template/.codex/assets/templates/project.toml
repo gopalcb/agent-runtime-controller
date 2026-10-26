@@ -1,0 +1,55 @@
+# Copy to <project>/.codex/project.toml and populate from verified project facts.
+# Paths are relative to the project root.
+# Remove unused sections. Uncomment examples only after verifying them.
+# This is navigation metadata, not built-in Codex configuration.
+
+schema_version = 1
+
+# name = "actual-project-name"
+# languages = ["python"]
+
+[paths]
+# source = ["src"]
+# tests = ["tests"]
+
+[docs]
+# overview = "README.md"
+# architecture = "docs/architecture.md"
+# development = "docs/development.md"
+# code_index = "docs/code-index.md"
+# tasks = "docs/tasks"
+
+[examples]
+# service = "path/to/representative/service.py"
+# test = "path/to/representative/test.py"
+
+# [commands.test]
+# run = "verified project test command"
+# cwd = "."
+
+# [commands.check]
+# run = "verified project validation command"
+# cwd = "."
+
+# [commands.index]
+# run = "verified code-index generation command"
+# cwd = "."
+
+# [commands.index_check]
+# run = "verified code-index freshness command"
+# cwd = "."
+
+# ==========================================================
+# Optional: enable for projects with a browser UI.
+# Verify the URL, viewports, and startup command before uncommenting.
+
+# [ui]
+# base_url = "http://localhost:4200"
+# viewports = [
+#   { width = 1440, height = 900 },
+#   { width = 390, height = 844 }
+# ]
+
+# [commands.dev]
+# run = "npm run start"
+# cwd = "."

@@ -1,0 +1,9 @@
+# Requirements gate
+
+Before UI testing or debugging, read the affected source, project instructions, startup docs, acceptance criteria and supplied design. Fill templates/requirements.json and run `check`. Do not begin exploratory UI actions against an ambiguous application or invent a design requirement. Resolve material ambiguity with the user; infer routine details from verified project files and document assumptions.
+
+Record project/scope/routes, base URL and startup command, exact source revision, test accounts/data, authorized side effects, reset procedure, design reference or agreed heuristics, named viewport dimensions and scenarios. Each scenario specifies start state, concrete actions, expected outcomes and applicable viewports. Include visual, flow, keyboard, console and network coverage. Add further scenarios for authentication, forms, navigation, persistence, asynchronous/loading/empty/error states, API failures, browser support, performance or accessibility when affected. Explain inapplicable features in the expectation rather than pretending they passed.
+
+Define stability and severity/acceptance criteria before starting. Minimum is two complete clean passes on final source, no unexplained runtime errors or failed relevant requests, no unresolved in-scope defects, and observed expected results at the agreed viewports. Never silently waive a failure. Record out-of-scope defects and agree changed scope if needed.
+
+A successful `check` proves a complete written contract only. Before a cycle, inspect the actual browser and page with Computer Use; confirm server reachability, correct URL, authentication and DevTools access. Never use tool discovery or HTTP reachability as proof of GUI access. If an OS permission, tool, service or account blocks progress, record BLOCKED with recovery steps. Stop repeated identical connection attempts and request necessary user input; continue independent local checks.

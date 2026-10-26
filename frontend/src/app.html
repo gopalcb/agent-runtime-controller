@@ -1,0 +1,158 @@
+@if (canvas) {
+  <main class="canvas-surface" [class.is-drawing]="drawing()" (pointerdown)="pointerDown($event)" (pointermove)="pointerMove($event)" (pointerup)="pointerUp($event)" (pointercancel)="pointerCancel()" aria-label="Visual instruction canvas">
+    @for (item of canvasInstructions(); track item.id; let index = $index) {
+      <div class="canvas-region" [ngStyle]="rectStyle(item)" [class.region-done]="item.status === 'completed'">
+        <span class="region-label"><b>{{ index + 1 }}</b>{{ item.title }}</span>
+        <span class="region-size">{{ size(item.rect) }}</span>
+      </div>
+    }
+    @if (draft(); as rect) {
+      <div class="canvas-region region-draft" [style.left.px]="rect.x" [style.top.px]="rect.y" [style.width.px]="rect.width" [style.height.px]="rect.height"><span class="region-size">{{ size(rect) }}</span></div>
+    }
+    @if (error() && !editing()) {
+      <div class="canvas-error" role="alert"><app-icon name="info" />{{ error() }}<button class="icon-button" (click)="error.set('')" aria-label="Dismiss error"><app-icon name="close" /></button></div>
+    }
+    <div class="canvas-toolbar" aria-label="Canvas tools">
+      <a class="canvas-brand" href="/controller/agent-runtime" aria-label="Return to interactive builder">RUNTIME CONTROLLER</a>
+      <span class="toolbar-divider"></span>
+      <button id="draw-button" class="draw-button" [class.selected]="drawing()" (click)="toggleDrawing()" [attr.aria-pressed]="drawing()" [disabled]="!state() || editing()"><app-icon name="square" /><span>{{ drawing() ? 'Drawing mode' : 'Draw rectangle' }}</span></button>
+      <span class="toolbar-hint">{{ drawing() ? 'Drag a region · Esc to stop' : 'Select a region' }}</span>
+      <span class="toolbar-divider"></span>
+      <span class="canvas-count" aria-live="polite">{{ canvasInstructions().length }} <span>regions</span></span>
+      <a class="canvas-return" href="/controller/agent-runtime" aria-label="Back to builder"><app-icon name="arrow" /></a>
+    </div>
+    @if (editing()) {
+      <div class="dialog-backdrop" (pointerdown)="$event.stopPropagation()">
+        <section class="region-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" (pointerdown)="$event.stopPropagation()">
+          <div class="dialog-top"><span class="eyebrow">VISUAL INSTRUCTION</span><button class="icon-button" (click)="dismissEditor()" [disabled]="busy() === 'save'" aria-label="Cancel instruction"><app-icon name="close" /></button></div>
+          <div class="dialog-heading"><span class="dialog-icon"><app-icon name="square" /></span><div><h2 id="dialog-title">What goes here?</h2><p>Describe this region. Codex will take it from here.</p></div></div>
+          <form (ngSubmit)="saveRegion()">
+            <label for="region-title">Region name</label>
+            <input id="region-title" name="title" [(ngModel)]="title" placeholder="e.g. Navigation header" maxlength="120" required autocomplete="off">
+            <label for="region-description">Instructions <span>Be as specific as you like</span></label>
+            <textarea id="region-description" name="description" [(ngModel)]="description" placeholder="A compact, glossy dark header. Place the logo on the left and navigation on the right…" maxlength="10000" rows="5" required></textarea>
+            @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+            <div class="dialog-geometry"><app-icon name="grid" /><span>{{ size(draft()!) }} px</span><span class="dot-divider">·</span><span>{{ draftViewport().width }} × {{ draftViewport().height }} canvas</span></div>
+            <div class="dialog-footer"><button type="button" class="button button-ghost" (click)="dismissEditor()" [disabled]="busy() === 'save'">Cancel</button><button type="submit" class="button button-primary" [disabled]="!title.trim() || !description.trim() || !!busy()"><app-icon [name]="busy() === 'save' ? 'pulse' : 'plus'" />{{ busy() === 'save' ? 'Saving…' : 'Save instruction' }}</button></div>
+          </form>
+        </section>
+      </div>
+    }
+  </main>
+} @else {
+<header class="app-header"><a class="brand" href="/controller/agent-runtime">Runtime Controller</a><nav aria-label="Workspace navigation">
+<button [class.active]="page() === 'builder'" [attr.aria-current]="page() === 'builder' ? 'page' : null" (click)="navigate('builder')"><app-icon name="layers" />Agent Runtime</button>
+<button [class.active]="page() === 'history'" [attr.aria-current]="page() === 'history' ? 'page' : null" (click)="navigate('history')"><app-icon name="history" />Run History</button>
+<button [class.active]="page() === 'settings'" [attr.aria-current]="page() === 'settings' ? 'page' : null" (click)="navigate('settings')"><app-icon name="gear" />Settings</button>
+<button [class.active]="page() === 'observability'" [attr.aria-current]="page() === 'observability' ? 'page' : null" (click)="navigate('observability')"><app-icon name="pulse" />Observability</button>
+<button [class.active]="page() === 'work-docs'" [attr.aria-current]="page() === 'work-docs' ? 'page' : null" (click)="navigate('work-docs')"><app-icon name="file-earmark-text" />Work Docs</button>
+</nav><div class="header-context" role="status"><span><app-icon [name]="activeRun() ? 'pulse' : 'circle'" />{{ runtimeLabel() }}</span><span title="CLI availability does not indicate authentication"><app-icon name="terminal" />CLI {{ state()?.health?.codex?.status || 'unknown' }}</span></div></header>
+<main class="workspace">
+@if (page() === 'settings') { <div class="workspace-project-actions"><button class="project-picker" (click)="openProject($event)" [disabled]="!state() || !!busy() || !!activeRun() || installation().status === 'installing'"><app-icon name="folder" />Select project<app-icon name="chevron-down" /></button><button (click)="navigate('install')"><app-icon name="box-seam" />{{ installed() ? 'Runtime installed' : 'Runtime setup' }}</button></div> }
+@if (error()) { <div class="feedback feedback-error" role="alert">{{ error() }}<button (click)="error.set('')" aria-label="Dismiss error">Dismiss</button></div> }
+@if (notice()) { <div class="feedback" role="status">{{ notice() }}<button (click)="notice.set('')" aria-label="Dismiss message">Dismiss</button></div> }
+@if (state() && !installed() && page() !== 'install') { <div class="feedback setup-banner" role="status"><span><app-icon name="info" /> Runtime setup is required before executing instructions.</span><button (click)="navigate('install')">Open setup<app-icon name="arrow" /></button></div> }
+@if (loading()) { <p role="status">Connecting to project…</p> } @else if (page() === 'builder') {
+<section class="page-heading"><h1>Agent Runtime</h1><div class="page-actions"><button (click)="openAdd($event)" [disabled]="!!busy() || !state()"><app-icon name="plus" />Add interactive work items</button></div></section>
+@for (approval of state()?.approvals ?? []; track approval.id) { <section class="panel approval"><h2>Approval requested</h2><p>Session {{ shortId(approval.runId) }} · {{ approval.method }}</p><p>{{ approval.description }}</p><div class="page-actions"><button (click)="decideApproval(approval, 'accept')" [disabled]="!!busy()">Accept once</button><button (click)="decideApproval(approval, 'decline')" [disabled]="!!busy()">Decline</button></div></section> }
+@if (activeRun(); as run) {
+<section class="panel runtime-panel" aria-label="Agent runtime output"><div class="panel-heading"><h2>Running…</h2><div class="page-actions"><button (click)="toggleFollow()" [attr.aria-pressed]="followOutput()">{{ followOutput() ? 'Pause auto-scroll' : 'Follow latest' }}</button><button (click)="showRun(run.id)">View run</button><button (click)="cancel(run)" [disabled]="!!busy()"><app-icon name="stop" />Stop run</button></div></div>
+<div #terminal class="runtime-terminal" tabindex="0" aria-label="Live agent output"><pre>{{ liveOutput() }}</pre></div></section>
+}
+<section class="panel instructions-panel"><div class="panel-heading"><h2>Work Items <span class="count-badge">{{ todos().length }}</span></h2><button (click)="openExecution($event)" [disabled]="!installed() || !selectedItems().length || !!activeRun() || !!busy() || !state()"><app-icon name="play" />Execute instructions</button></div>
+@if (todos().length) { <label class="select-all"><input type="checkbox" [checked]="selectedItems().length === todos().length" [indeterminate]="selectedItems().length > 0 && selectedItems().length < todos().length" (change)="selectAll($any($event.target).checked)" [disabled]="!!activeRun() || !!busy()">Select all pending · {{ selectedItems().length }} selected</label> }
+          @if (todos().length) {
+            <div class="instruction-list">
+              @for (item of todos(); track item.id; let index = $index) {
+                <article class="instruction-card">
+                  <div class="instruction-top">@if (item.status === 'todo') { <input type="checkbox" [checked]="selectedIds().includes(item.id)" (change)="toggleItem(item.id)" [disabled]="!!activeRun() || !!busy()" [attr.aria-label]="'Select ' + item.title"> }<span class="instruction-number">{{ (index + 1).toString().padStart(2, '0') }}</span><span class="status-pill" [attr.data-status]="item.status"><i></i>{{ item.status }}</span><button class="icon-button remove-instruction" (click)="remove(item)" [disabled]="!!busy() || item.status === 'running' || !!activeRun()" [attr.aria-label]="'Delete ' + item.title"><app-icon name="trash" /></button></div>
+                  <h3>{{ item.title }}</h3><p>{{ item.description }}</p>
+                  @if (item.source; as source) { <div class="instruction-source"><span><app-icon name="external" />{{ source.url }}</span><code>{{ source.selector }}</code></div> }
+                  <div class="instruction-metadata"><span><app-icon name="square" />{{ size(item.rect) }} px</span><span>at {{ item.rect.x | number:'1.0-0' }}, {{ item.rect.y | number:'1.0-0' }}</span><span>{{ item.viewport.width }} × {{ item.viewport.height }} viewport</span></div>
+                </article>
+              }
+            </div>
+
+          } @else {
+            <div class="full-empty"><h3>No pending work items</h3><p>Draw a region or open a local URL to save an instruction.</p></div>
+          }
+</section>
+@if (otherItems().length || activeRun()) { <section class="panel"><div class="panel-heading"><h2>Active and unresolved work</h2><button (click)="navigate('history')"><app-icon name="history" />View runs</button></div><div class="instruction-list status-items">@for (item of otherItems(); track item.id) { <article class="instruction-card"><span class="status-pill" [attr.data-status]="item.status">{{ item.status }}</span><h3>{{ item.title }}</h3><p>{{ item.description }}</p></article> }@if (activeRun(); as run) { <article class="instruction-card"><h3>Active run {{ shortId(run.id) }}</h3><p>{{ run.status }}</p><button (click)="showRun(run.id)">View progress<app-icon name="arrow" /></button><button (click)="cancel(run)" [disabled]="!!busy()"><app-icon name="stop" />Stop run</button></article> }</div></section> }
+} @else if (page() === 'history') {
+<section class="page-heading"><h1>Run History</h1></section>
+<section class="panel"><div class="panel-heading"><h2>Completed work items <span class="count-badge">{{ archivedItems().length }}</span></h2></div><div class="instruction-list status-items">@for (item of archivedItems(); track item.id) { <article class="instruction-card"><span class="status-pill" data-status="completed">Completed</span><h3>{{ item.title }}</h3><p>{{ item.description }}</p>@if (item.source; as source) { <div class="instruction-source">{{ source.url }}<code>{{ source.selector }}</code></div> }</article> } @empty { <p class="panel-body">No completed work items yet.</p> }</div></section>
+<section id="run-history"><div class="page-heading history-heading"><h2>Run history</h2></div>      @if (!runs().length) {
+        <section class="panel full-empty"><span class="large-empty-icon"><app-icon name="history" /></span><h2>No runs recorded.</h2><p>Execute visual instructions to start a run.<br>Its progress and output will appear here.</p><button class="button button-outline" (click)="navigate('builder')">Agent runtime<app-icon name="arrow" /></button></section>
+      } @else {
+        <div class="history-grid"><section class="panel run-list"><div class="panel-heading"><h2>Agent runs</h2><span class="count-badge">{{ runs().length }}</span></div>@for (run of runs(); track run.id) { <button class="run-item" [class.selected]="details()?.id === run.id" (click)="selectedRun.set(run.id)"><span class="run-item-icon" [attr.data-status]="run.status"><app-icon [name]="run.status === 'completed' ? 'check' : isActive(run) ? 'pulse' : 'terminal'" /></span><span class="run-item-content"><strong>Build {{ shortId(run.id) }}</strong><span>{{ run.createdAt | date:'MMM d, h:mm a' }} · {{ run.instructionIds.length }} instructions</span></span><span class="status-pill" [attr.data-status]="run.status"><i></i>{{ run.status }}</span></button>}</section>
+        @if (details(); as run) { <section class="panel run-details"><div class="panel-heading"><div class="panel-title"><app-icon name="terminal" /><h2>Run details</h2></div>@if (isActive(run)) { <button class="button button-danger small-button" (click)="cancel(run)" [disabled]="!!busy()"><app-icon name="stop" />{{ busy() === 'cancel' ? 'Stopping…' : 'Stop run' }}</button> }</div><div class="run-detail-body"><div class="run-detail-title"><div><span class="eyebrow">BUILD {{ shortId(run.id) }}</span><h3>{{ run.instructionIds.length }} visual {{ run.instructionIds.length === 1 ? 'instruction' : 'instructions' }}</h3></div><span class="status-pill" [attr.data-status]="run.status"><i></i>{{ run.status }}</span></div><dl class="run-facts"><div><dt>Started</dt><dd>{{ run.createdAt | date:'medium' }}</dd></div><div><dt>Finished</dt><dd>{{ run.finishedAt ? (run.finishedAt | date:'medium') : '—' }}</dd></div></dl>@if (run.prompt) { <div class="run-context"><span class="eyebrow">YOUR DIRECTION</span><p>{{ run.prompt }}</p></div> }@if (run.error) { <div class="run-error" role="status"><app-icon name="info" /><span>{{ run.error }}</span></div> }<div class="output-heading"><span class="eyebrow">AGENT OUTPUT</span>@if (isActive(run)) { <span class="live-label"><span class="mini-dot"></span>LIVE</span> }</div><pre class="agent-output">{{ run.output || (isActive(run) ? 'Waiting for the agent’s first response…' : 'No agent output was recorded for this run.') }}</pre></div></section> }</div>
+      }
+</section>
+} @else if (page() === 'install') {
+<section class="page-heading"><h1>Install project runtime</h1></section>
+<section class="panel install-panel"><div class="install-heading"><app-icon name="box-seam" /><div><h2>Runtime Controller setup</h2><p>Install the managed runtime template in this project. Existing edited and unrelated files are preserved.</p></div></div>
+<p class="install-status" aria-live="polite"><app-icon [name]="installation().status === 'completed' ? 'check-circle' : installation().status === 'failed' ? 'exclamation-triangle' : 'terminal'" />{{ installation().status }} @if (installation().version) { <span>· {{ installation().version }}</span> }</p>
+<div class="install-progress" role="progressbar" aria-label="Runtime installation progress" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="installation().progress" [attr.aria-valuetext]="installation().progress + '% · ' + installation().status"><div [style.width.%]="installation().progress"></div></div>
+<p class="progress-caption">{{ installation().progress }}% · Reported by the installer</p>
+<ol class="install-steps" aria-live="polite">@for (step of installation().steps; track step.id) { <li [class.step-running]="step.status === 'running' || step.status === 'installing'" [attr.data-status]="step.status"><app-icon [name]="step.status === 'completed' ? 'check-circle' : step.status === 'failed' ? 'exclamation-triangle' : step.status === 'running' || step.status === 'installing' ? 'arrow-repeat' : 'circle'" /><div><strong>{{ step.label }}</strong><span>{{ step.status }}</span>@if (step.message) { <p>{{ step.message }}</p> }</div></li> }</ol>
+@if (installation().error) { <p class="form-error" role="alert">{{ installation().error }}</p> }
+<div class="page-actions">@if (installation().status === 'not-installed') { <button (click)="install('install')" [disabled]="!!busy() || !!activeRun()"><app-icon name="download" />Install runtime</button> } @else if (installation().status === 'failed') { <button (click)="install('retry')" [disabled]="!!busy() || !!activeRun()"><app-icon name="arrow-repeat" />Retry installation</button> } @else if (installation().status === 'completed') { <button (click)="navigate('builder')">Open Agent Runtime<app-icon name="arrow" /></button><button (click)="install('reinstall')" [disabled]="!!busy() || !!activeRun()"><app-icon name="arrow-repeat" />Reinstall</button><button (click)="install('reset')" [disabled]="!!busy() || !!activeRun()"><app-icon name="trash" />Reset managed runtime</button> } @else { <p role="status">Installing… Keep this controller open to follow progress.</p> }</div>
+</section>
+ } @else if (page() === 'work-docs') {
+<section class="page-heading"><h1>Work Docs</h1><button (click)="loadDocuments()" [disabled]="docsLoading() || !state()"><app-icon name="arrow-clockwise" />Refresh documents</button></section>
+@if (docsError()) { <p class="feedback feedback-error" role="alert">{{ docsError() }}</p> }
+@if (docsLoading()) { <p role="status">Loading documents…</p> }
+@if (docsTruncated()) { <p role="status">Showing a bounded selection of project documents.</p> }
+<div class="docs-layout"><aside class="panel docs-sidebar"><label for="doc-search">Find a document</label><input id="doc-search" [(ngModel)]="docSearch" placeholder="Search file names"><p class="docs-hint">Project Markdown · newest first</p><nav aria-label="Work documents">@for (doc of filteredDocuments(); track doc.path) { <button [class.selected]="documentPath() === doc.path" [attr.aria-current]="documentPath() === doc.path ? 'true' : null" (click)="openDocument(doc.path)"><app-icon name="file-earmark-text" /><span>{{ doc.path }}<small>{{ doc.modifiedAt | date:'short' }}</small></span></button> } @empty { <p>No matching Markdown documents.</p> }</nav></aside><section class="panel doc-reader"><div class="panel-heading"><h2>{{ documentPath() || 'Document preview' }}</h2></div><article class="markdown-content" tabindex="0" aria-label="Document content" [innerHTML]="documentHtml()"></article>@if (!documentPath()) { <p class="panel-body">Plans and other Markdown documents will appear here when saved in the project.</p> }</section></div>
+} @else if (page() === 'settings') {
+<section class="page-heading"><h1>Settings</h1></section><section class="panel settings-panel"><h2>Codex execution settings</h2><p>Saved locally for this project. Changes apply to future runs; active runs keep their original settings.</p>
+<form (ngSubmit)="saveSettings()" class="settings-form">
+<label for="settings-sandbox">File access</label><select id="settings-sandbox" name="sandbox" [(ngModel)]="settings.sandbox" (ngModelChange)="sandboxChanged()"><option value="read-only">Read only</option><option value="workspace-write">Workspace write</option><option value="danger-full-access">Full access</option></select>
+<p class="field-help">Read only prevents file edits. Workspace write allows edits in the project. Full access removes filesystem sandbox restrictions and permits changes outside the project.</p>
+<label for="settings-approval">Approval policy</label><select id="settings-approval" name="approvalPolicy" [(ngModel)]="settings.approvalPolicy"><option value="never">Never</option><option value="on-request">On request</option><option value="untrusted">Untrusted commands</option></select>
+<p class="field-help">Never disables approval prompts; commands requiring approval cannot proceed. On request lets Codex request permission. Untrusted commands require approval unless allowed by the runtime. Supported requests appear in Agent Runtime for accept once or decline.</p>
+<label for="settings-model">Model</label><input id="settings-model" name="model" [(ngModel)]="settings.model" maxlength="120" placeholder="Runtime default" autocomplete="off">
+<label for="settings-effort">Reasoning effort</label><select id="settings-effort" name="reasoningEffort" [(ngModel)]="settings.reasoningEffort"><option value="">Runtime default</option><option value="minimal">Minimal</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="xhigh">Extra high</option></select>
+<label class="checkbox-label"><input id="settings-network" type="checkbox" name="networkAccess" [(ngModel)]="settings.networkAccess" [disabled]="settings.sandbox === 'danger-full-access'">Allow network access</label><p class="field-help">Allows network requests from sandboxed commands when enabled. Full access removes sandbox restrictions, so this toggle does not restrict that mode.</p><button type="submit" [disabled]="!!busy() || !state()">{{ busy() === 'settings' ? 'Saving…' : 'Save settings' }}</button>
+</form></section>
+} @else {
+<section class="page-heading"><h1>Observability</h1></section>
+<div class="metrics-grid"><section class="panel metric"><h2>Recorded tokens</h2><strong>{{ reportedRuns().length ? (recordedTotal() | number) : 'Unreported' }}</strong><p>{{ reportedRuns().length }} of {{ runs().length }} sessions reported. All persisted sessions; unaffected by filters.</p><p>Recorded plugin usage, not account billing. Missing reports are excluded.</p></section><section class="panel metric"><h2>Runtime</h2><strong>{{ state()?.runtime?.status || 'Unavailable' }}</strong><p>{{ completed() }} completed · {{ failures() }} failed or interrupted</p></section></div>
+<section class="panel health-panel"><div class="panel-heading"><h2>System health</h2></div>@if (state()?.health; as health) { <dl class="health-grid"><div><dt>Server</dt><dd>{{ health.server.status }} · {{ health.server.uptimeSeconds | number:'1.0-0' }}s uptime</dd></div><div><dt>Project</dt><dd>{{ health.project.status }}</dd></div><div><dt>Codex CLI (not authentication)</dt><dd>{{ health.codex.status }} {{ health.codex.version || '' }}</dd></div><div><dt>Browser driver</dt><dd>{{ health.browser.status }}</dd></div><div><dt>Process memory</dt><dd>{{ health.memory.rssBytes / 1048576 | number:'1.0-1' }} MiB</dd></div></dl> } @else { <p class="panel-body">Health unavailable</p> }</section>
+<section class="panel"><div class="panel-heading"><h2>Session token usage</h2></div><div class="filters"><label>Search session<input id="run-search" [(ngModel)]="runSearch" placeholder="Session ID or prompt"></label><label>Status<select id="run-status" [(ngModel)]="runStatus"><option value="">All statuses</option>@for (status of ['starting', 'running', 'completed', 'failed', 'interrupted', 'cancelled']; track status) { <option [value]="status">{{ status }}</option> }</select></label><label>Since<input type="date" id="run-since" [(ngModel)]="runSince"></label></div><div class="table-scroll"><table><thead><tr><th>Session</th><th>Started</th><th>Status</th><th>Input</th><th>Cached input</th><th>Output</th><th>Reasoning output</th><th>Total</th></tr></thead><tbody>@for (run of filteredRuns(); track run.id) { <tr><td><button (click)="showRun(run.id)">{{ shortId(run.id) }}</button></td><td>{{ run.createdAt | date:'short' }}</td><td>{{ run.status }}</td>@if (run.tokenUsage; as usage) { <td>{{ usage.inputTokens | number }}</td><td>{{ usage.cachedInputTokens | number }}</td><td>{{ usage.outputTokens | number }}</td><td>{{ usage.reasoningOutputTokens | number }}</td><td>{{ usage.totalTokens | number }}</td> } @else { <td colspan="5">Unreported</td> }</tr> } @empty { <tr><td colspan="8">No matching sessions</td></tr> }</tbody></table></div></section>
+<section class="panel activity-panel"><div class="panel-heading"><h2>Logs and errors</h2><span>{{ filteredEvents().length }} events</span></div><div class="filters"><label>Search logs<input id="event-search" [(ngModel)]="eventSearch" placeholder="Message or session ID"></label><label>Severity<select id="event-severity" [(ngModel)]="eventSeverity"><option value="">All severities</option><option value="info">Info</option><option value="debug">Debug</option><option value="warning">Warning</option><option value="error">Errors</option></select></label><label>Event type<select id="event-type" [(ngModel)]="eventType"><option value="">All types</option>@for (type of eventTypes(); track type) { <option [value]="type">{{ type }}</option> }</select></label><label>Session<select id="event-session" [(ngModel)]="eventSession"><option value="">All sessions</option>@for (run of runs(); track run.id) { <option [value]="run.id">{{ shortId(run.id) }}</option> }</select></label></div><div class="event-list">@for (event of filteredEvents(); track event.id) { <article class="event-row" [attr.data-severity]="severity(event)"><div class="event-body"><span class="severity-badge">{{ severity(event) | uppercase }}</span><span class="event-type">{{ event.type }}</span><p>{{ event.message }}</p>@if (event.runId) { <button (click)="showRun(event.runId)">Session {{ shortId(event.runId) }}</button> }</div><time>{{ event.time | date:'medium' }}</time></article> } @empty { <p class="panel-body">No matching events</p> }</div></section>
+}
+
+</main>
+}
+@if (urlDialog()) {
+  <div class="dialog-backdrop url-backdrop">
+    <section class="region-dialog url-dialog" role="dialog" aria-modal="true" aria-labelledby="url-dialog-title" aria-describedby="url-dialog-help">
+      <div class="url-dialog-heading"><h2 id="url-dialog-title">Open URL</h2><button type="button" class="icon-button" (click)="closeUrlDialog()" [disabled]="busy() === 'url'" aria-label="Close URL dialog"><app-icon name="close" /></button></div>
+      <p id="url-dialog-help">Open your local app to select elements and describe changes.</p>
+      <form (ngSubmit)="submitUrl()">
+        <label for="target-url">Local app URL</label>
+        <input id="target-url" name="targetUrl" [(ngModel)]="targetUrl" placeholder="http://localhost:4200" maxlength="2048" autocomplete="url" inputmode="url" spellcheck="false" [disabled]="busy() === 'url'" [attr.aria-invalid]="urlError() ? 'true' : null" [attr.aria-describedby]="urlError() ? 'url-error' : 'url-dialog-help'">
+        @if (urlError()) { <p id="url-error" class="form-error" role="alert">{{ urlError() }}</p> }
+        <div class="dialog-footer"><button type="button" class="button button-ghost" (click)="closeUrlDialog()" [disabled]="busy() === 'url'">Cancel</button><button type="submit" class="button button-primary" [disabled]="!targetUrl.trim() || busy() === 'url'"><app-icon [name]="busy() === 'url' ? 'pulse' : 'external'" />{{ busy() === 'url' ? 'Opening…' : 'Open app' }}</button></div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (executionDialog()) {
+<div class="dialog-backdrop"><section class="region-dialog execute-dialog" role="dialog" aria-modal="true" aria-labelledby="execute-title" aria-describedby="execute-help"><h2 id="execute-title">Execute {{ selectedItems().length }} work {{ selectedItems().length === 1 ? 'item' : 'items' }}?</h2><p id="execute-help">Codex will apply these instructions to this project using the saved execution settings.</p><ul class="selected-instructions">@for (item of selectedItems(); track item.id) { <li>{{ item.title }}</li> }</ul><form (ngSubmit)="execute()"><label for="execute-prompt">Additional instructions <span>(optional)</span></label><textarea id="execute-prompt" name="prompt" [(ngModel)]="prompt" maxlength="10000" rows="5" [disabled]="busy() === 'execute'"></textarea>@if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }<div class="dialog-footer"><button id="execute-cancel" type="button" (click)="closeExecution()" [disabled]="busy() === 'execute'">Cancel</button><button type="submit" [disabled]="!selectedItems().length || !!activeRun() || !!busy()">{{ busy() === 'execute' ? 'Starting…' : 'Confirm execution' }}</button></div></form></section></div>
+}
+
+@if (addDialog()) {
+<div class="dialog-backdrop"><section class="region-dialog add-dialog" role="dialog" aria-modal="true" aria-labelledby="add-title"><div class="url-dialog-heading"><h2 id="add-title">Add interactive work items</h2><button class="icon-button" (click)="closeAdd()" aria-label="Close add dialog"><app-icon name="close" /></button></div><p>Choose where to describe your changes.</p><div class="add-choices"><button id="add-drawing" (click)="chooseDrawing()"><app-icon name="square" /><span>Blank drawing canvas<small>Draw a region and describe what belongs there.</small></span></button><button (click)="chooseUrl($event)"><app-icon name="external" /><span>Existing local URL<small>Select elements in your running local app.</small></span></button></div></section></div>
+}
+@if (projectDialog()) {
+<div class="dialog-backdrop"><section class="region-dialog project-dialog" role="dialog" aria-modal="true" aria-labelledby="project-title"><div class="url-dialog-heading"><h2 id="project-title">Select project folder</h2><button class="icon-button" (click)="closeProject()" [disabled]="busy() === 'project'" aria-label="Close folder dialog"><app-icon name="close" /></button></div><p>Browse local folders on the controller machine or enter an absolute path.</p><form (ngSubmit)="browseFolders()"><label for="project-path">Folder path</label><div class="folder-path"><input id="project-path" name="projectPath" [(ngModel)]="projectPath" autocomplete="off" [disabled]="busy() === 'project'"><button type="submit" [disabled]="folderLoading() || !!busy()"><app-icon name="folder" />Browse</button></div></form>
+@if (folderLoading()) { <p role="status">Loading folders…</p> }
+@if (folderError()) { <p class="form-error" role="alert">{{ folderError() }}</p> }
+@if (folderResult(); as result) { <div class="folder-list" aria-label="Available folders">@if (result.parent) { <button (click)="browseFolders(result.parent!)" [disabled]="folderLoading() || !!busy()"><app-icon name="back" />Parent folder</button> } @for (folder of result.folders; track folder.path) { <button (click)="browseFolders(folder.path)" [disabled]="folderLoading() || !!busy()"><app-icon name="folder" />{{ folder.name }}</button> } @empty { <p>No subfolders in this directory.</p> }</div> }
+@if (state()?.projects?.length) { <label for="recent-project">Recent projects</label><select id="recent-project" [ngModel]="''" (ngModelChange)="browseFolders($event)" [disabled]="folderLoading() || !!busy()"><option value="" disabled>Choose a recent project</option>@for (project of state()?.projects ?? []; track project.id) { <option [value]="project.root">{{ project.name }} · {{ project.root }}</option> }</select> }
+@if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+<div class="dialog-footer"><button (click)="closeProject()" [disabled]="busy() === 'project'">Cancel</button><button (click)="switchProject()" [disabled]="!projectPath.trim() || !!busy() || folderLoading() || !!activeRun() || installation().status === 'installing'"><app-icon name="check" />{{ busy() === 'project' ? 'Switching…' : 'Select folder' }}</button></div></section></div>
+}

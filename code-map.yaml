@@ -1,0 +1,41 @@
+components:
+  - path: backend/main.ts
+    responsibility: NestJS assembly, loopback startup and owned shutdown
+  - path: backend/projects.ts
+    responsibility: Project session ownership and switch isolation
+  - path: backend/installation.ts
+    responsibility: Python worker lifecycle and observable progress
+  - path: frontend/src/app.ts
+    responsibility: Angular project-aware UI state and workflows
+  - path: installer/code-map.yaml
+    responsibility: Python installation and startup module map
+  - path: scripts/export-runtime-template.py
+    responsibility: Reviewed portable payload inventory and hash validation
+  - path: runtime-template/.codex/tools/project_memory/code-map.yaml
+    responsibility: Explicit project memory persistence module map
+  - path: backend/documents.ts
+    responsibility: Bounded project Markdown discovery and safe reads
+  - path: frontend/src/markdown.ts
+    responsibility: Escaped Markdown formatting for Work Docs
+  - path: backend/routing.ts
+    responsibility: API declarations, dynamic project snapshots, request guards and Angular routes
+  - path: backend/store.ts
+    responsibility: Exclusive project state ownership, instruction validation and bounded activity
+  - path: backend/state-file.ts
+    responsibility: Atomic JSON replacement and temporary-file cleanup
+  - path: backend/runtime.ts
+    responsibility: Work selection, immutable runs, approvals, cancellation and token usage
+  - path: backend/codex.ts
+    responsibility: Isolated Codex subprocess, RPC correlation and pending-request cleanup
+  - path: backend/settings.ts
+    responsibility: Project execution settings validation and sandbox policy
+  - path: backend/types.ts
+    responsibility: Shared persistence and API contracts
+  - path: backend/browser.ts
+    responsibility: Owned drawing canvas browser
+  - path: backend/live-browser.ts
+    responsibility: Local app browser, navigation boundaries and capture binding validation
+  - path: backend/live-overlay.ts
+    responsibility: Self-contained browser selection and instruction editor
+  - path: backend/reference.ts
+    responsibility: Local URL and captured element evidence validation
