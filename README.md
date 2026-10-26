@@ -108,6 +108,8 @@ Use **Settings** to select a project or open its runtime setup. **Work Docs** re
 **Add interactive work items** opens a choice between a blank drawing canvas and an existing local URL. Draw a rectangle or highlight an element, describe the change, and save. Select pending items and confirm execution. Completed items move to Run History; unresolved work remains visible separately. A completed Codex turn is not a guarantee that its code is correct: review the output and validation.
 
 
+For a standalone explanation with code excerpts and a demo placeholder, open the [portfolio article](docs/portfolio/runtime-controller.html) in a browser.
+
 ## Installation
 
 ### Requirements

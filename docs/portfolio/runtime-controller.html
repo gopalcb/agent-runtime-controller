@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How Runtime Controller turns visual feedback into project-scoped coding work with Angular, NestJS, Playwright and Codex.">
+<title>Runtime Controller — From visual feedback to code</title>
+<style>
+:root{color-scheme:light;--ink:#182a40;--muted:#52667c;--blue:#1261bd;--line:#d9e3ef;--paper:#f4f7fb}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.75 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--blue);text-underline-offset:4px}a:focus-visible,summary:focus-visible{outline:3px solid #338cff;outline-offset:5px}
+.skip{position:absolute;left:16px;top:-90px;background:#fff;padding:8px}.skip:focus{top:12px;z-index:2}
+header{background:linear-gradient(125deg,#081527,#132d4d);color:#f5f9ff;padding:60px max(24px,calc((100vw - 1050px)/2));border-bottom:4px solid #3a9cf1}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#a0d1ff;font-weight:700}
+h1{font-size:clamp(2.1rem,5vw,3.6rem);line-height:1.12;letter-spacing:-.04em;margin:14px 0 20px;max-width:850px}
+header p{max-width:760px;color:#cfdfef;margin-bottom:0}main{max-width:1050px;margin:auto;padding:36px 24px 72px}
+section{margin:0 0 52px;scroll-margin-top:24px}h2{font-size:1.8rem;line-height:1.3;letter-spacing:-.025em;margin:0 0 18px}h3{font-size:1.2rem;margin:28px 0 10px}
+p{margin:12px 0 20px}nav{display:flex;flex-wrap:wrap;gap:10px 24px;padding:22px 0;margin-bottom:36px;border-bottom:1px solid var(--line);font-size:14px}
+.video-slot{min-height:260px;aspect-ratio:16/9;display:grid;place-content:center;text-align:center;padding:28px;border:1px dashed #629aca;border-radius:16px;background:linear-gradient(145deg,#0e213a,#173d60);color:#eaf5ff}
+.video-slot .play{display:grid;place-items:center;width:68px;height:68px;margin:auto;border:1px solid #89c8ff;border-radius:50%;font-size:24px;color:#a5dbff}
+.video-slot h2{margin:18px 0 8px}.video-slot p{max-width:580px;margin:0;color:#c0d6ea}.caption{font-size:13px;color:var(--muted)}
+.flow{list-style:none;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;counter-reset:step}
+.flow li{counter-increment:step;background:#fff;padding:20px;border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:8px}
+.flow li:before{content:"0" counter(step);display:block;color:var(--blue);font-size:12px;font-weight:700;letter-spacing:.1em}.flow strong{display:block;margin:6px 0}.flow span{font-size:14px;color:var(--muted)}
+.note{padding:18px 22px;border-left:3px solid var(--blue);background:#eaf2fc}.note p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:15px}th,td{text-align:left;padding:14px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#e7eff8}td:first-child{font-weight:600}
+pre{padding:22px;background:#0e1c2e;color:#e2efff;border-radius:10px;overflow:auto;font-size:13px;line-height:1.65;tab-size:2}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}p code,li code,td code{font-size:.88em;overflow-wrap:anywhere}
+details{background:#fff;border:1px solid var(--line);padding:18px;border-radius:10px;margin:20px 0}summary{cursor:pointer;font-weight:650}
+.sources{font-size:14px}.sources li{margin:7px 0}footer{border-top:1px solid var(--line);padding-top:24px;color:var(--muted);font-size:14px}
+@media(max-width:700px){header{padding:38px 24px}.flow{grid-template-columns:1fr 1fr}table,tbody,tr,td{display:block}thead{display:none}tr{padding:10px 0;border-bottom:1px solid var(--line)}td{border:0;padding:5px 8px}pre{padding:16px;font-size:12px}.video-slot{aspect-ratio:auto;min-height:260px}}
+@media(max-width:420px){.flow{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{body{background:white;font-size:11pt}header{background:white;color:#182a40;padding:20px 0}header p,.eyebrow{color:#182a40}main{padding:20px 0}nav,.skip{display:none}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f6;color:#182a40}.video-slot{min-height:120px;aspect-ratio:auto;background:#eef2f6;color:#182a40}.video-slot p{color:#182a40}}
+</style>
+</head>
+<body>
+<a class="skip" href="#article">Skip to article</a>
+<header>
+<div class="eyebrow">Project walkthrough · Developer tools</div>
+<h1>Runtime Controller<br>From visual feedback to code</h1>
+<p>A local workspace where a developer can point to a UI change, save it as a work item, and ask Codex to implement it in the right project.</p>
+</header>
+<main id="article">
+<section aria-label="Video demonstration">
+<!-- VIDEO DEMO: replace this placeholder with a video element using controls,
+     a poster image, and a captions track. Keep a text transcript below it.
+     Example: <video controls preload="metadata" poster="demo-poster.jpg">
+       <source src="runtime-controller-demo.mp4" type="video/mp4">
+       <track kind="captions" src="demo-captions.vtt" srclang="en" label="English" default>
+     </video> -->
+<div class="video-slot"><span class="play" aria-hidden="true">▷</span><h2>Video demo goes here</h2><p>Show a UI selection, save an instruction, execute the work item, then review the changed application and run history.</p></div>
+<p class="caption">Demo placeholder. No recording is embedded yet. Add captions and a transcript when the video is ready.</p>
+</section>
+<nav aria-label="Article sections"><a href="#idea">The idea</a><a href="#flow">How it works</a><a href="#implementation">Inside the implementation</a><a href="#installation">Installation</a><a href="#decisions">Design decisions</a><a href="#sources">Source guide</a></nav>
+<section id="idea">
+<h2>Point to the change you mean</h2>
+<p>“Make the header smaller” sounds clear until someone has to decide which header, how small, and at what screen size. Runtime Controller keeps that visual context beside the written request.</p>
+<p>A developer can draw a rectangle on a blank canvas to describe something new. For an existing app, they can open a local URL, highlight an element and describe the change. Each instruction becomes a saved work item rather than disappearing into a long chat.</p>
+<p>For example, a request might be: “Reduce this header's height, centre the menu, and keep the project title on the left.” The captured rectangle and viewport explain the intended area. An element selection can also include its selector, styles and sanitized HTML or text. These are clues for finding the source, not a guarantee that a DOM element maps directly to one component.</p>
+</section>
+<section id="flow">
+<h2>One request, four stages</h2>
+<ol class="flow"><li><strong>Capture</strong><span>Save a description with a rectangle or an element reference.</span></li><li><strong>Select</strong><span>Choose the pending items and confirm the scope of the run.</span></li><li><strong>Implement</strong><span>The backend gives Codex the saved instructions and project directory.</span></li><li><strong>Review</strong><span>Read the output, inspect the changes and check the application.</span></li></ol>
+<p>The Angular interface talks to a NestJS API running on the same machine. The API selects the project session, which owns its work-item store, capture browsers, installer and Codex connection. The coding agent works on the selected project's files.</p>
+<div class="note"><p><strong>A completed turn is a review point.</strong> It means Codex finished its turn, not that the resulting code has independently passed acceptance testing. The developer still reviews the diff and the reported checks.</p></div>
+</section>
+<section id="implementation">
+<h2>Inside the implementation</h2>
+<p>The application uses familiar web technologies. The part that connects them is a small TypeScript runtime that translates saved work into an agent turn and translates protocol notices back into run state.</p>
+<table><thead><tr><th>Technology</th><th>Job in this project</th></tr></thead><tbody>
+<tr><td>Angular + TypeScript</td><td>Project settings, work-item selection, document reading and execution views. Signals hold UI state; fetch sends local API requests.</td></tr>
+<tr><td>NestJS + Express</td><td>Local HTTP routes, request validation and access to the active project session.</td></tr>
+<tr><td>Playwright</td><td>Owned browser contexts for drawing and local element selection, plus supplemental browser tests.</td></tr>
+<tr><td>Codex CLI app-server</td><td>The coding agent process. A custom Node adapter exchanges JSON-RPC through standard input and output; the project does not use a separate agent SDK.</td></tr>
+<tr><td>Python standard library</td><td>Installation, file ownership checks, progress records and the project launcher.</td></tr>
+<tr><td>Mermaid, DOMPurify and Bootstrap Icons</td><td>Local diagram rendering with input checks, and locally bundled interface icons.</td></tr>
+</tbody></table>
+<h3>1. The UI submits IDs, not a second copy of the work</h3>
+<p>After confirmation, the frontend sends the selected instruction IDs and any extra context to <code>POST /api/execute</code>. The backend reads the saved records, so it can validate that every requested item still exists and is pending.</p>
+<p class="caption">Source excerpt: <code>frontend/src/app.ts</code>, inside <code>execute()</code>.</p>
+<pre><code>const run = await this.mutate(&#x27;/execute&#x27;, { instructionIds: this.selectedItems().map(item =&gt; item.id), prompt: this.prompt.trim() }) as Run;</code></pre>
+<p>The shared <code>mutate()</code> helper adds the current <code>X-Project-Id</code> and <code>X-Builder-Token</code> headers. The API rejects stale project requests. The execution route also checks that installation has completed before handing the request to the runtime.</p>
+<h3>2. TypeScript freezes the run's inputs</h3>
+<p><code>Runtime.execute()</code> rejects duplicate or unknown IDs and prevents a second active run. It copies the selected instructions and settings into a run record, marks those items as running, then starts asynchronous dispatch. The API can return the run ID while the agent continues working.</p>
+<p>The runtime starts a Codex thread with the project directory as <code>cwd</code>, the selected sandbox and approval settings, and developer instructions to follow project conventions. It then builds the actual task from the saved snapshot.</p>
+<p class="caption">Source excerpt: <code>backend/runtime.ts</code>, after the thread has started. <code>requestSettings</code> supplies the working directory, approval policy and optional model.</p>
+<pre><code>const prompt = [
+        &#x27;Implement these saved visual instructions in this project.&#x27;,
+        `Project: ${this.store.root}`,
+        `Additional user context: ${run.prompt}`,
+        &#x27;Visual instructions (CSS pixels with viewport reference):&#x27;,
+        JSON.stringify(run.instructions, null, 2),
+      ].join(&#x27;\n&#x27;);
+      const result = await transport.request(&#x27;turn/start&#x27;, {
+        ...requestSettings,
+        threadId: run.threadId,
+        input: [{ type: &#x27;text&#x27;, text: prompt }],
+        sandboxPolicy: sandboxPolicy(settings, this.store.root),
+        ...(settings.reasoningEffort ? { effort: settings.reasoningEffort } : {}),
+      });</code></pre>
+<p>This is where the work items become an agent request. Their JSON includes the descriptions and visual reference data. The runtime asks Codex to interpret that context and edit the source; it does not convert rectangle coordinates into generated CSS by itself.</p>
+<h3>3. The adapter talks to a local process</h3>
+<p><code>CodexTransport</code> launches <code>codex app-server --listen stdio://</code> using Node's <code>spawn()</code>. It completes initialization, checks the effective configuration and disables inherited integrations for its owned execution. Each request receives an ID so the response can resolve the correct pending promise.</p>
+<p class="caption">Source excerpt: <code>backend/codex.ts</code>. Each JSON-RPC message occupies one line.</p>
+<pre><code>private send(message: any) {
+    if (!this.child || this.child.stdin.destroyed) throw new Error(&#x27;Codex is not connected&#x27;);
+    this.child.stdin.write(JSON.stringify(message) + &#x27;\n&#x27;);
+  }</code></pre>
+<p>Node's <code>readline</code> reads the process output. Responses resolve requests; notifications update run state; supported command or file-change approval requests are routed back to the UI. A timeout is reported rather than automatically retrying work that might already have started.</p>
+<h3>4. Progress returns through persisted state</h3>
+<p>The backend handles notices such as <code>item/completed</code>, <code>turn/completed</code> and <code>thread/tokenUsage/updated</code>. It records completed agent messages, run status and the greatest cumulative token report for the thread. Missing usage remains unreported.</p>
+<p>Angular polls the local state API every two seconds. This implementation does not use a browser WebSocket or a token-by-token stream. The active run shows output in the runtime page; finished runs remain in history. Cancelling a run stops owned execution, but cannot undo edits the agent already made.</p>
+</section>
+<section id="installation">
+<h2>A package that stays with the project</h2>
+<p>The repository is named <code>agent-runtime-controller</code>. Its npm package currently retains the name <code>@gb-systems/visual-agent-builder</code>, and exposes the <code>runtime-controller</code> command. Installation uses a locally built archive.</p>
+<p>From the controller checkout, install dependencies and build the package:</p>
+<pre><code>npm ci
+npm --prefix frontend ci
+npm pack</code></pre>
+<p>Then install the generated archive as a development dependency in the application you want to work on. The README includes the required dependency override and a copyable agent prompt. The npm lifecycle invokes Python, starts or finds the controller, and opens the installation page. That page shows real step status while the installer checks prerequisites and deploys the runtime files.</p>
+<p>There are two kinds of installed files: the application itself under <code>node_modules</code>, and project guidance and records under <code>.codex</code>. The installer also exposes packaged skills through <code>.agents/skills</code>.</p>
+<details><summary>Explore the installed project structure</summary>
+<pre><code>your-project/
+├── src/                              Your existing application
+├── package.json                      Development dependency and package settings
+├── AGENTS.md                         Bridge added only when this file is absent
+├── node_modules/@gb-systems/
+│   └── visual-agent-builder/         Installed package; CLI name: runtime-controller
+│       ├── bin/                      npm lifecycle and command entry points
+│       ├── dist/                     Compiled NestJS API and TypeScript runtime
+│       ├── frontend/dist/            Compiled Angular UI
+│       ├── installer/                Python setup and launcher modules
+│       └── runtime-template/         Reviewed, portable runtime files
+├── .agents/skills/                   Discoverable copies of packaged skills
+└── .codex/
+    ├── AGENTS.md                     Project runtime guidance
+    ├── agents/                       Optional role definitions
+    ├── skills/                       Planning, implementation and testing guidance
+    ├── workflows/                    Development, checkpoint and memory procedures
+    ├── references/                   Supporting task-record conventions
+    ├── assets/templates/            Project configuration template
+    ├── tools/                       Logging, UI verification and memory utilities
+    ├── visual-builder/
+    │   ├── AGENTS.md                 Instructions for controller-owned runs
+    │   ├── state.json                Work items, runs, settings and activity
+    │   └── owner.lock                Present while a process owns this project
+    └── runtime-controller/
+        ├── install.json              Installation steps and current status
+        ├── managed.json              Hashes of installer-owned files
+        ├── launcher.json             Package location and controller port
+        ├── codex.py                  Explicit controller-aware Codex launcher
+        ├── projects.json             Registry in the controller&#x27;s initial project
+        ├── conflicts/                Incoming files when local edits must be kept
+        └── memory/                   Project-owned notes, index and usage guide</code></pre>
+</details>
+<p>File hashes let the installer distinguish its own unchanged files from local edits. Reinstallation updates files it still owns and preserves conflicts for review. Reset removes unchanged managed runtime files while keeping work history, settings and project memory.</p>
+<p>The generated <code>.codex/runtime-controller/codex.py</code> launcher can ensure the controller is running before starting Codex. It is an explicit entry point: opening an IDE or running the ordinary Codex command does not automatically invoke it.</p>
+</section>
+<section id="decisions">
+<h2>Why the boundaries matter</h2>
+<p><strong>Project context is part of every operation.</strong> Switching folders changes the active store and closes the old capture browsers. The controller blocks switching during an installation or active run, and rejects requests from stale tabs.</p>
+<p><strong>Visual capture uses an owned browser.</strong> It does not borrow a personal browser's logged-in session. Existing-page capture is limited to local URLs and same-origin navigation; closed shadow roots and cross-origin frames cannot be selected.</p>
+<p><strong>Guidance and credentials have different homes.</strong> Portable instructions and explicit memory notes belong to the project. Native Codex authentication, private session history and generated memory are not copied into the template.</p>
+<p><strong>Local execution still needs review.</strong> The default sandbox is workspace-write, with command network access disabled. Settings can grant broader permissions. The tool is designed for a trusted local developer, not as a hosted service for multiple users.</p>
+<h3>What has been checked</h3>
+<p>The repository includes API and runtime tests, installer tests, packaged-install checks and browser tests using temporary projects. Agent transports are simulated where needed so verification does not launch real coding work against a user's project. These checks exercise controller behavior; they do not establish the quality of every change a model may produce.</p>
+</section>
+<section id="sources" class="sources">
+<h2>Read the implementation</h2>
+<p>The excerpts above come from this repository. They show parts of larger methods; validation, cleanup and error handling remain in the linked source files.</p>
+<ul>
+<li><a href="https://github.com/gopalcb/agent-runtime-controller/blob/main/README.md">README: architecture, setup and operational details</a></li>
+<li><a href="https://github.com/gopalcb/agent-runtime-controller/blob/main/frontend/src/app.ts">Angular state, requests and work selection</a></li>
+<li><a href="https://github.com/gopalcb/agent-runtime-controller/blob/main/backend/routing.ts">NestJS routes and request guards</a></li>
+<li><a href="https://github.com/gopalcb/agent-runtime-controller/blob/main/backend/runtime.ts">Work snapshots, dispatch, notices and cancellation</a></li>
+<li><a href="https://github.com/gopalcb/agent-runtime-controller/blob/main/backend/codex.ts">Codex subprocess and JSON-RPC transport</a></li>
+<li><a href="https://github.com/gopalcb/agent-runtime-controller/blob/main/installer/ARCHITECTURE.md">Installer ownership and lifecycle design</a></li>
+</ul>
+<p>This article needs no JavaScript, CDN or build step. Source links require access to the repository.</p>
+</section>
+<footer>Runtime Controller · Project implementation walkthrough. Video placeholder and source excerpts are included for publication preparation.</footer>
+</main>
+</body>
+</html>
