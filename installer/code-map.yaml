@@ -1,0 +1,251 @@
+{
+  "project": "runtime-controller-installer",
+  "files": {
+    "__init__.py": {
+      "purpose": "Install the portable Runtime Controller template without external dependencies.",
+      "functions": {}
+    },
+    "__main__.py": {
+      "purpose": "Expose the installer lifecycle as a dependency-free NDJSON command line.",
+      "functions": {
+        "main": {
+          "summary": "Parse one installation action and report failures without a traceback."
+        }
+      }
+    },
+    "bootstrap.py": {
+      "purpose": "Start the install UI before asking its authenticated API to run the installer.",
+      "functions": {
+        "bootstrap_install": {
+          "summary": "Ensure the UI, then submit installation without waiting on its worker lock."
+        },
+        "main": {
+          "summary": "Run the npm lifecycle bridge with an explicit project destination."
+        }
+      }
+    },
+    "ensure.py": {
+      "purpose": "Ensure a loopback controller by identity and readiness, without switching projects.",
+      "functions": {
+        "request_json": {
+          "summary": "Make a direct loopback request, bypassing inherited network proxy settings."
+        },
+        "get_identity": {
+          "summary": "Distinguish unavailable service from a listener with the wrong identity."
+        },
+        "startup_directory": {
+          "summary": "Create a private per-user lock and log directory shared across package copies."
+        },
+        "ensure_controller": {
+          "summary": "Serialize startup, wait for HTTP identity, and register without activating a project."
+        },
+        "main": {
+          "summary": "Ensure readiness and optionally open the controller install page."
+        }
+      }
+    },
+    "host_setup.py": {
+      "purpose": "Explicit administrator setup for the local alias and an unprivileged TCP proxy.",
+      "functions": {
+        "update_hosts": {
+          "summary": "Add the loopback alias once, keeping an exclusive timestamped backup."
+        },
+        "drop_privileges": {
+          "summary": "Drop all supplementary groups and real/effective/saved root identities."
+        },
+        "main": {
+          "summary": "Configure hosts and run the foreground proxy only after dropping root."
+        },
+        "ProxyConnection.handle": {
+          "summary": "Forward HTTP and upgraded connections until EOF or an idle timeout."
+        }
+      }
+    },
+    "lifecycle.py": {
+      "purpose": "Apply and reset hash-owned template files, recording atomic observable progress.",
+      "functions": {
+        "emit_state": {
+          "summary": "Persist state before emitting a newline-delimited progress snapshot."
+        },
+        "load_payload": {
+          "summary": "Verify all template hashes and add the generated package-location receipt."
+        },
+        "reconcile_files": {
+          "summary": "Replace only unchanged owned files, preserving conflicts and memory notes."
+        },
+        "build_bridges": {
+          "summary": "Expose portable instructions and skills through project discovery locations."
+        },
+        "run_install": {
+          "summary": "Execute one locked lifecycle action and retain actionable failed state."
+        }
+      }
+    },
+    "runtime.py": {
+      "purpose": "Verify packaged Node assets and provision only the browser required by the controller.",
+      "functions": {
+        "check_runtime": {
+          "summary": "Require a built package and installed Node dependencies without bootstrapping them."
+        },
+        "ensure_browser": {
+          "summary": "Verify Chromium and download it through the installed Playwright CLI if needed."
+        }
+      }
+    },
+    "storage.py": {
+      "purpose": "Perform descriptor-relative, symlink-safe file operations and advisory locking.",
+      "functions": {
+        "SafeRoot.__init__": {
+          "summary": "Open an existing directory without following a final symlink."
+        },
+        "SafeRoot.close": {
+          "summary": "Release the root directory descriptor."
+        },
+        "SafeRoot.parent": {
+          "summary": "Yield the parent descriptor and basename, rejecting symlink components."
+        },
+        "SafeRoot.read": {
+          "summary": "Read a regular file safely, returning None only for a missing path."
+        },
+        "SafeRoot.write": {
+          "summary": "Atomically replace a regular file without following symlinks."
+        },
+        "SafeRoot.remove": {
+          "summary": "Unlink only the named entry; never recursively remove directories."
+        },
+        "SafeRoot.read_json": {
+          "summary": "Read JSON state or return its explicit default when absent."
+        },
+        "SafeRoot.write_json": {
+          "summary": "Persist formatted JSON with atomic replacement."
+        },
+        "SafeRoot.lock": {
+          "summary": "Hold a kernel lock; crashes release it without unsafe stale-lock deletion."
+        }
+      }
+    },
+    "validation.py": {
+      "purpose": "Validate project paths, template manifests, and lifecycle action boundaries.",
+      "functions": {
+        "validate_project": {
+          "summary": "Resolve an existing project directory; never create a mistyped project root."
+        },
+        "validate_relative": {
+          "summary": "Accept only normalized relative POSIX paths below a controlled root."
+        },
+        "load_manifest": {
+          "summary": "Validate the payload inventory before any managed file is changed."
+        },
+        "validate_action": {
+          "summary": "Restrict destructive lifecycle actions to completed installations."
+        },
+        "validate_receipt": {
+          "summary": "Bound persisted ownership to installer assets and native discovery bridges."
+        },
+        "validate_port": {
+          "summary": "Require an unprivileged port for the controller process."
+        }
+      }
+    },
+    "wrapper.py": {
+      "purpose": "Run the real Codex CLI after ensuring the controller, preserving auth and arguments.",
+      "functions": {
+        "main": {
+          "summary": "Ensure the project controller, then replace this process with the Codex CLI."
+        }
+      }
+    },
+    "../tests/test_installer.py": {
+      "purpose": "Exercise installer file ownership, symlink boundaries, progress, and HTTP startup.",
+      "functions": {
+        "PrivilegeTests.test_proxy_drops_privileges_before_listen": {
+          "summary": "The privileged helper must bind, drop root, then activate its listener."
+        },
+        "PrivilegeTests.test_privilege_drop_clears_groups_and_uid": {
+          "summary": "Privilege drop clears supplementary groups before gid and uid changes."
+        },
+        "RuntimeTests.test_browser_download_uses_resolved_hoisted_cli": {
+          "summary": "Missing Chromium invokes the resolved Playwright CLI, not a guessed child path."
+        },
+        "EnsureTests.setUp": {
+          "summary": "Start a local test API and private disposable startup directory."
+        },
+        "EnsureTests.stop_server": {
+          "summary": "Close the owned fixture server and join its serving thread."
+        },
+        "EnsureTests.test_parallel_ensure_reuses_ready_service": {
+          "summary": "Simultaneous ensure callers reuse a verified controller without spawning."
+        },
+        "EnsureTests.test_other_project_registers_without_install_or_switch": {
+          "summary": "Bootstrap preserves the active project when another project requests startup."
+        },
+        "EnsureTests.test_bootstrap_submits_authenticated_install": {
+          "summary": "The UI bootstrap starts the worker through project-authenticated HTTP."
+        },
+        "EnsureTests.test_wrong_service_is_not_treated_as_absent": {
+          "summary": "An occupied incompatible port must not trigger another launch."
+        },
+        "EnsureTests.test_failed_startup_terminates_owned_child": {
+          "summary": "A child which never becomes ready is terminated on timeout."
+        },
+        "EnsureTests.test_parallel_cold_start_spawns_one_real_node_process": {
+          "summary": "Competing cold starts converge on one detached Node fixture and clean it up."
+        },
+        "EnsureTests.test_parallel_cold_start_spawns_one_real_node_process.record_spawn": {
+          "summary": "Retain handles so the test always cleans up its owned child process."
+        },
+        "ControllerHandler.log_message": {
+          "summary": "Keep the test fixture quiet."
+        },
+        "ControllerHandler.do_GET": {
+          "summary": "Return real JSON identity and bootstrap responses."
+        },
+        "ControllerHandler.do_POST": {
+          "summary": "Record authenticated writes without altering the active project."
+        },
+        "InstallerTests.setUp": {
+          "summary": "Create separate disposable project, payload, and outside directories."
+        },
+        "InstallerTests.create_template": {
+          "summary": "Write a real hash-verified template fixture."
+        },
+        "InstallerTests.install": {
+          "summary": "Capture CLI events while executing the real lifecycle implementation."
+        },
+        "InstallerTests.test_progress_and_idempotent_install": {
+          "summary": "Progress records are real, persisted, and repeated installs are no-ops."
+        },
+        "InstallerTests.test_reset_preserves_edits_memory_and_unrelated_state": {
+          "summary": "Reset removes only unchanged managed files and never deletes user notes."
+        },
+        "InstallerTests.test_conflicts_and_reinstall_keep_user_files": {
+          "summary": "Existing instructions and edited managed skills receive incoming copies."
+        },
+        "InstallerTests.test_manifest_integrity_failure_is_retryable": {
+          "summary": "A bad source hash fails before deployment and a repaired payload retries."
+        },
+        "InstallerTests.test_lock_rejects_competing_install_without_corrupting_state": {
+          "summary": "A competing process cannot replace the current installation state."
+        },
+        "InstallerTests.test_symlinked_codex_and_destination_cannot_escape_project": {
+          "summary": "Both root and nested directory symlinks fail without modifying targets."
+        },
+        "InstallerTests.test_traversal_and_private_payload_are_rejected": {
+          "summary": "Untrusted manifests cannot target parent directories or private auth."
+        },
+        "InstallerTests.test_native_bridges_preserve_existing_instructions_and_skills": {
+          "summary": "Discovery bridges never replace existing project-owned instructions or skills."
+        },
+        "InstallerTests.test_interrupted_install_can_retry": {
+          "summary": "A lock released by a dead worker allows retry from persisted installing state."
+        },
+        "InstallerTests.test_wrapper_preserves_auth_environment_and_arguments": {
+          "summary": "The child guard bypasses startup while forwarding CLI arguments and auth paths."
+        },
+        "InstallerTests.test_wrapper_uses_installed_controller_port": {
+          "summary": "A custom controller port is persisted and forwarded to ensure on startup."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+project: portable-project-memory
+files:
+  memory.py:
+    purpose: Explicit project note CLI and atomic index persistence.
+    functions:
+      resolve_project:
+        summary: Resolve explicit project or project runtime environment safely.
+      validate_index:
+        summary: Validate supported schema and bounded note records.
+      manage_notes:
+        summary: Read, search or append notes through safe directory handles.
+      main:
+        summary: Parse commands and print JSON results or concise errors.
+  test_memory.py:
+    purpose: Temporary-project persistence and filesystem boundary tests.
+    classes:
+      ProjectMemoryTests:
+        methods:
+          test_notes_survive_reload_and_projects_remain_isolated:
+            summary: Verify persisted text, search, file mode and project isolation.
+          test_environment_and_explicit_project_preserve_native_home:
+            summary: Verify project resolution and untouched native auth home.
+          test_symlinked_namespace_index_and_lock_are_rejected:
+            summary: Reject symlink escapes at writable filesystem boundaries.
+          test_invalid_text_and_corrupt_index_preserve_existing_bytes:
+            summary: Reject invalid input and malformed indexes without replacement.
+          test_concurrent_cli_additions_keep_every_note:
+            summary: Verify process locking prevents lost additions.
+          test_failed_atomic_replace_keeps_old_index_and_removes_temporary:
+            summary: Verify failed replacement preserves previous state and cleanup.

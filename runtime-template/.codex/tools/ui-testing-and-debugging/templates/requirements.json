@@ -1,0 +1,18 @@
+{
+  "project": "TODO project path",
+  "scope": "TODO routes, included behavior, excluded behavior and acceptance criteria",
+  "appRevision": "TODO source commit or deterministic source digest",
+  "baseUrl": "http://localhost:4200",
+  "startCommand": "TODO command and working directory",
+  "testData": "TODO accounts, fixtures, side effects and reset procedure",
+  "designBaseline": "TODO reference design path or explicit visual heuristics",
+  "cleanPasses": 2,
+  "viewports": [{"name":"desktop","width":1440,"height":900},{"name":"mobile","width":390,"height":844}],
+  "scenarios": [
+    {"id":"layout","kind":"visual","viewports":["desktop","mobile"],"startState":"TODO","actions":"TODO inspect alignment, spacing, clipping, overflow, hover/focus","expected":"TODO"},
+    {"id":"journey","kind":"flow","viewports":["desktop","mobile"],"startState":"TODO","actions":"TODO happy, error, loading, empty, navigation, reset paths as applicable","expected":"TODO"},
+    {"id":"keys","kind":"keyboard","viewports":["desktop","mobile"],"startState":"TODO","actions":"TODO tab order, focus, Enter/Space","expected":"TODO"},
+    {"id":"logs","kind":"console","viewports":["desktop","mobile"],"startState":"TODO","actions":"TODO DevTools Console during journey","expected":"TODO"},
+    {"id":"requests","kind":"network","viewports":["desktop","mobile"],"startState":"TODO","actions":"TODO DevTools Network, request payload, status, response, timings","expected":"TODO explicit API N/A reason if no API exists"}
+  ]
+}
