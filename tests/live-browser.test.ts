@@ -69,14 +69,15 @@ test('local app selection suppresses clicks, persists sanitized element evidence
     const bounds = await target.boundingBox(); assert.ok(bounds);
     await target.click({position: {x: 10, y: 10}});
     assert.equal(await page.evaluate(() => (window as any).fixtureClicks), 1);
-    await overlay.getByLabel('Region name', {exact: true}).fill('Account card update');
+    assert.equal(await overlay.getByLabel('Region name', {exact: true}).count(), 0);
+    assert.equal(await overlay.getByLabel('Instructions', {exact: true}).evaluate(node => (node.getRootNode() as ShadowRoot).activeElement === node), true);
     await overlay.getByLabel('Instructions', {exact: true}).fill('Increase the card spacing');
     await supplementalScreenshot(page, 'desktop-1440x900-editor');
     await overlay.getByRole('button', {name: 'Save instruction', exact: true}).click();
     // The binding is asynchronous; wait for an observable saved instruction list.
     await page.waitForFunction(async () => (await (window as any).__formaVisual({action: 'list'})).instructions.length === 1);
     const item = f.store.state.instructions[0];
-    assert.equal(item.title, 'Account card update');
+    assert.equal(item.title, 'Increase the card spacing');
     assert.equal(item.description, 'Increase the card spacing');
     assert.equal(item.status, 'todo');
     assert.equal(item.source?.url, f.url);
@@ -104,7 +105,7 @@ test('local app selection suppresses clicks, persists sanitized element evidence
     const saved = await page.evaluate(() => (window as any).__formaVisual({action: 'list'}));
     assert.equal(saved.instructions[0].id, item.id);
     await overlay.getByRole('button', {name: /^Saved \(1\)$/}).click();
-    await overlay.getByText('Account card update', {exact: true}).waitFor();
+    await overlay.locator('.saved-item strong').filter({hasText: 'Increase the card spacing'}).waitFor();
   } finally { await f.cleanup(); }
 });
 
@@ -118,7 +119,6 @@ test('Escape and Cancel discard unsaved element instructions', async () => {
       await overlay.getByRole('button', {name: 'Select element', exact: true}).click();
       await page.locator('#ordinary').hover();
       await page.locator('#ordinary').click();
-      await overlay.getByLabel('Region name', {exact: true}).fill('Discard this card');
       await overlay.getByLabel('Instructions', {exact: true}).fill('This must never be saved');
       if (dismissal === 'Escape') await page.keyboard.press('Escape');
       else await overlay.getByRole('button', {name: 'Cancel', exact: true}).click();
@@ -155,7 +155,7 @@ test('mobile toolbar and element editor fit a 390 by 844 viewport', async () => 
     const editorBox = await fitsViewport(editor);
     const toolbarBox = await fitsViewport(overlay.getByRole('toolbar'));
     assert.ok(editorBox.y + editorBox.height <= toolbarBox.y, 'Editor does not overlap toolbar');
-    await overlay.getByLabel('Region name', {exact: true}).fill('Mobile button');
+    assert.equal(await overlay.getByLabel('Region name', {exact: true}).count(), 0);
     await overlay.getByLabel('Instructions', {exact: true}).fill('Increase the touch target spacing');
     await fitsViewport(overlay.getByRole('button', {name: 'Save instruction', exact: true}));
     await supplementalScreenshot(page, 'mobile-390x844-editor');

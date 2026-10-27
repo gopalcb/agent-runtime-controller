@@ -20,7 +20,7 @@ import {
 import express, { Request, Response, RequestHandler } from 'express';
 import { chromium } from 'playwright';
 
-import { listDocuments, readDocument } from './documents';
+import { readDocument } from './documents';
 import { Projects } from './projects';
 import { active } from './types';
 
@@ -89,8 +89,18 @@ export function createApiModule(projects: Projects, url: string) {
     }
 
     @Get('documents')
-    documents() {
-      return listDocuments(projects.session.store.root);
+    async documents() {
+      const index = await projects.session.documents.refresh();
+      return {
+        documents: index.documents.map(({ excerpt, ...doc }) => doc),
+        truncated: index.truncated,
+      };
+    }
+
+    @Post('documents/search')
+    @HttpCode(200)
+    searchDocuments(@Body() body: { query?: unknown }) {
+      return projects.session.documents.search(body?.query);
     }
 
     @Get('documents/content')

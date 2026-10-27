@@ -34,6 +34,10 @@ export type Instruction = {
 };
 
 export type Run = {
+  activity?: RunActivity[];
+  activityTruncated?: boolean;
+  plan?: { step: string; status: 'pending' | 'inProgress' | 'completed' }[];
+  planExplanation?: string;
   id: string;
   status: 'starting' | 'running' | 'completed' | 'failed' | 'interrupted' | 'cancelled';
   instructionIds: string[];
@@ -47,6 +51,15 @@ export type Run = {
   output: string;
   threadId?: string;
   turnId?: string;
+};
+
+export type RunActivity = {
+  id: string;
+  time: string;
+  kind: string;
+  title: string;
+  text: string;
+  status: string;
 };
 
 export type Activity = {

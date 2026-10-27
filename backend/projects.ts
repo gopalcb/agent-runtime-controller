@@ -6,6 +6,7 @@ import { homedir } from 'node:os';
 
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
+import { DocumentSearch } from './document-search';
 import { ProjectStore } from './store';
 import { Runtime } from './runtime';
 import { VisualBrowser } from './browser';
@@ -18,6 +19,7 @@ type Project = { id: string; name: string; root: string };
 type Session = {
   store: ProjectStore;
   runtime: Runtime;
+  documents: DocumentSearch;
   browser: VisualBrowser;
   liveBrowser: LiveBrowser;
   installation: Installation;
@@ -96,6 +98,7 @@ export class Projects {
       project,
       store,
       runtime: new Runtime(store),
+      documents: new DocumentSearch(store.root),
       browser: new VisualBrowser(this.url),
       liveBrowser: new LiveBrowser(store),
       installation: new Installation(store.root, Number(new URL(this.url).port)),
@@ -202,6 +205,7 @@ export class Projects {
       this.session.store.event('project.selected', 'Selected project ' + project.name);
     } finally {
       if (next) {
+        await next.documents.close();
         next.runtime.close();
         next.store.close();
       }
@@ -211,6 +215,7 @@ export class Projects {
 
   /** Close capture and installer workers before releasing the project lock. */
   async close() {
+    await this.session.documents.close();
     await this.session.browser.close();
     await this.session.liveBrowser.close();
     await this.session.installation.close();

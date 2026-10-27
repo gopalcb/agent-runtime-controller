@@ -15,3 +15,23 @@ Codex transport owns pending RPC cleanup and reports unexpected disconnects sepa
 Backend formatting uses two spaces, single quotes and a 100-column target. Run `npm run format:backend` and `npm run format:backend:check`. Keep blank lines between workflow phases, concise purpose comments on meaningful operations, and domain-specific names. Reduce duplicated logic rather than compressing multiple statements onto one line. Protocol payloads remain dynamic where the external JSON-RPC schema is not modeled; persistence/API types stay explicit.
 
 Work Docs lazily loads Mermaid for fenced diagrams. `frontend/src/mermaid.ts` rejects HTML labels before layout, uses strict rendering, and displays SVG as inert images with expandable escaped source. Detached document nodes discard asynchronous results; temporary rendering surfaces are always removed. Invalid or oversized diagrams retain readable source.
+
+`backend/activity.ts` projects public Codex item lifecycle/delta notices into bounded per-run activity; completion snapshots replace streamed bodies. It stores validated plan updates separately, omits raw reasoning and protocol payloads, and strips terminal controls. Runtime rejects notices for other threads/known turns and never infers plan completion from turn completion. Angular merges item activity with lifecycle/approval/error events, renders escaped text, and keeps existing final-output compatibility for older records. State still polls every two seconds; this is not a PTY or byte-for-byte native CLI replay.
+
+`backend/document-search.ts` owns per-project index reconciliation and semantic ranking.
+It calls the packaged portable `.codex/tools/folder-watcher/watcher.cjs` and reuses
+`documents.ts` for discovery/reads. Index writes validate destination types and use
+atomic replacement under `.codex/runtime-controller`; execution state is untouched.
+The service lazily starts on document listing/search and closes before project release.
+`POST /api/documents/search` inherits mutation-token/origin/project guards. Its fresh
+bounded index and query are sent to a dedicated Codex transport with read-only
+sandbox, disabled shell/integrations, temporary cwd and low effort. Results are
+validated, deduplicated and intersected with indexed and currently available paths.
+Timeout, startup/disconnect, malformed response and cancellation close the transport;
+its scratch directory is removed. The frontend fences query results by request and
+project epoch, and clearing/refreshing invalidates pending responses. No index text
+or generated HTML is injected into the document list.
+
+Search resolves its model from the account catalog (available gpt-6-luna, otherwise
+the advertised default with low effort); an explicit environment override bypasses
+selection. Upstream error explanations are bounded and returned to the existing UI.

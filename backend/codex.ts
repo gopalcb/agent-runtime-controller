@@ -48,12 +48,15 @@ export class CodexTransport implements Transport {
     private executable = process.env.VISUAL_BUILDER_CODEX_BINARY || 'codex',
     private timeout = 30000,
     private serverRequest?: ServerRequest,
+    private readOnly = false,
   ) {}
 
   /** Inspect inherited integrations, disable them, then verify the effective config. */
   async start() {
     if (this.child) return;
 
+    if (this.readOnly && !this.disabledFeatures.includes('shell_tool'))
+      this.disabledFeatures.push('shell_tool');
     try {
       // Probe configuration without creating a thread or running model tools.
       await this.connect([]);
@@ -105,7 +108,8 @@ export class CodexTransport implements Transport {
   /** Launch one isolated app-server and complete its initialization handshake. */
   private async connect(overrides: string[]) {
     const configuration = [
-      'sandbox_mode="workspace-write"',
+      `sandbox_mode="${this.readOnly ? 'read-only' : 'workspace-write'}"`,
+      'sandbox_read_only.network_access=false',
       'approval_policy="never"',
       'sandbox_workspace_write.network_access=false',
       'sandbox_workspace_write.writable_roots=[]',

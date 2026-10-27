@@ -12,7 +12,8 @@ interface TokenUsage { inputTokens: number; cachedInputTokens: number; outputTok
 interface Settings { sandbox: 'read-only' | 'workspace-write' | 'danger-full-access'; approvalPolicy: 'never' | 'on-request' | 'untrusted'; model: string; reasoningEffort: '' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh'; networkAccess: boolean }
 interface Approval { id: string; runId: string; method: string; description: string; createdAt: string }
 interface Health { server: { status: string; uptimeSeconds: number }; project: { status: string; root: string }; codex: { status: string; version?: string }; browser: { status: string }; memory: { rssBytes: number } }
-interface Run { tokenUsage?: TokenUsage; id: string; status: string; instructionIds: string[]; createdAt: string; finishedAt?: string; error?: string; output?: string; prompt?: string }
+interface RunActivity { id: string; time: string; kind: string; title: string; text: string; status: string }
+interface Run { activity?: RunActivity[]; activityTruncated?: boolean; plan?: { step: string; status: string }[]; planExplanation?: string; threadId?: string; tokenUsage?: TokenUsage; id: string; status: string; instructionIds: string[]; createdAt: string; finishedAt?: string; error?: string; output?: string; prompt?: string }
 interface Event { id: string; time: string; type: string; message: string; runId?: string }
 interface Project { id: string; name: string; root: string }
 interface Installation { status: 'not-installed' | 'installing' | 'completed' | 'failed'; progress: number; steps: { id: string; label: string; status: string; message?: string }[]; error?: string; version?: string }
@@ -81,10 +82,10 @@ export class AppComponent implements OnDestroy {
   }
   private clearProjectUI() {
     this.projectEpoch++;
-    this.documents.set([]); this.documentContent.set(''); this.documentPath.set(''); this.docsError.set(''); this.docsLoading.set(false); this.docSearch = ''; this.documentRequest++; this.followOutput.set(true);
+    this.documents.set([]); this.documentContent.set(''); this.documentPath.set(''); this.docsError.set(''); this.docsLoading.set(false); this.docSearch = ''; this.documentQueryChanged(); this.documentRequest++;
     this.selectedIds.set([]); this.selectedRun.set(null); this.settingsLoaded = false; this.settings = { sandbox: 'workspace-write', approvalPolicy: 'never', model: '', reasoningEffort: '', networkAccess: false };
     this.executionDialog.set(false); this.addDialog.set(false); this.urlDialog.set(false); this.projectDialog.set(false); this.editing.set(false); this.draft.set(null); this.drawing.set(false); this.start = null;
-    this.folderResult.set(null); this.folderError.set(''); this.urlError.set(''); this.notice.set(''); this.projectPath = ''; this.title = ''; this.description = ''; this.prompt = ''; this.runSearch = ''; this.runStatus = ''; this.runSince = ''; this.eventSearch = ''; this.eventType = ''; this.eventSession = ''; this.eventSeverity = '';
+    this.followOutput.set(true); this.lastOutput = ''; this.folderResult.set(null); this.folderError.set(''); this.urlError.set(''); this.notice.set(''); this.projectPath = ''; this.title = ''; this.description = ''; this.prompt = ''; this.runSearch = ''; this.runStatus = ''; this.runSince = ''; this.eventSearch = ''; this.eventType = ''; this.eventSession = ''; this.eventSeverity = '';
   }
   async switchProject() {
     if (this.activeRun() || this.installation().status === 'installing') return;
@@ -146,6 +147,8 @@ export class AppComponent implements OnDestroy {
   }
   eventTypes() { return [...new Set(this.events().map(event => event.type))].sort(); }
   reportedRuns() { return this.runs().filter(run => run.tokenUsage != null); }
+  private readonly tokenFormatter = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+  formatTokens(value: number) { return this.tokenFormatter.format(value); }
   recordedTotal() { return this.reportedRuns().reduce((sum, run) => sum + run.tokenUsage!.totalTokens, 0); }
 
 
@@ -153,15 +156,41 @@ export class AppComponent implements OnDestroy {
   @ViewChild('documentBody') documentBody?: ElementRef<HTMLElement>;
   readonly followOutput = signal(true);
   private lastOutput = '';
-  readonly liveOutput = computed(() => {
-    const run = this.activeRun();
-    if (!run) return '';
-    return run.output || this.state()?.events.filter(event => event.runId === run.id).map(event => event.message).join('\n') || 'Waiting for agent output…';
+  readonly displayRun = computed(() => this.activeRun() || this.state()?.runs[0]);
+  readonly terminalEntries = computed(() => {
+    const run = this.displayRun();
+    if (!run) return [];
+    const activity = run.activity || [];
+    const events: RunActivity[] = (this.state()?.events || [])
+      .filter(event => event.runId === run.id && (!activity.length || !event.type.startsWith('item.')))
+      .map(event => ({ id: event.id, time: event.time, kind: event.type, title: event.type, text: event.message, status: this.severity(event) === 'error' ? 'failed' : 'completed' }));
+    if (!activity.length && run.output) events.push({ id: 'legacy-output', time: run.finishedAt || this.state()?.events.filter(event => event.runId === run.id).at(-1)?.time || run.createdAt, kind: 'agentMessage', title: 'codex · saved response', text: run.output, status: run.status });
+    return [...events, ...activity].sort((a, b) => a.time.localeCompare(b.time));
   });
+  readonly liveOutput = computed(() => JSON.stringify(this.terminalEntries()));
+  readonly workflowSteps = computed(() => {
+    const run = this.displayRun();
+    if (!run) return [];
+    const running = ['starting', 'running'].includes(run.status);
+    if (run.plan?.length) return run.plan.map(step => ({ ...step, status: !running && step.status === 'inProgress' ? 'interrupted' : step.status }));
+    return [
+      { step: 'Connect to Codex', status: run.threadId || run.status === 'running' || run.status === 'completed' ? 'completed' : running ? 'inProgress' : 'interrupted' },
+      { step: 'Execute instructions', status: run.status === 'completed' ? 'completed' : run.status === 'running' ? 'inProgress' : run.status === 'starting' ? 'pending' : 'interrupted' },
+      { step: 'Finish run', status: run.status === 'completed' ? 'completed' : running ? 'pending' : 'interrupted' },
+    ];
+  });
+  readonly completedSteps = computed(() => this.workflowSteps().filter(step => step.status === 'completed').length);
+  terminalScroll() {
+    const node = this.terminal?.nativeElement;
+    if (node && node.scrollHeight - node.clientHeight - node.scrollTop > 40) this.followOutput.set(false);
+  }
+  runTranscript(run: Run) {
+    return run.activity?.length ? run.activity.map(entry => entry.title + ' [' + entry.status + ']\n' + entry.text).join('\n\n') : run.output;
+  }
   private scrollOutput() {
     const node = this.terminal?.nativeElement;
     if (!node) { this.lastOutput = ''; return; }
-    const key = this.activeRun()?.id + this.liveOutput();
+    const key = this.displayRun()?.id + ':' + node.clientHeight + ':' + node.clientWidth + this.liveOutput();
     if (node && this.followOutput() && key !== this.lastOutput) { node.scrollTop = node.scrollHeight; this.lastOutput = key; }
   }
   toggleFollow() { this.followOutput.update(value => !value); this.lastOutput = ''; }
@@ -174,8 +203,38 @@ export class AppComponent implements OnDestroy {
   readonly docsTruncated = signal(false);
   docSearch = '';
   private documentRequest = 0;
-  filteredDocuments() { return this.documents().filter(doc => doc.path.toLowerCase().includes(this.docSearch.toLowerCase())); }
+  private searchRequest = 0;
+  readonly docsSearching = signal(false);
+  readonly docSearchResults = signal<{path:string;size:number;modifiedAt:string}[] | null>(null);
+  filteredDocuments() { return this.docSearchResults() ?? this.documents(); }
+  documentQueryChanged() {
+    this.searchRequest++;
+    this.docsSearching.set(false);
+    this.docSearchResults.set(null);
+    this.docsError.set('');
+  }
+  async searchDocuments() {
+    const query = this.docSearch.trim(), project = this.state()?.project.id, epoch = this.projectEpoch;
+    if (!query) { this.documentQueryChanged(); return; }
+    if (!project || this.docsSearching()) return;
+    const request = ++this.searchRequest;
+    this.docsSearching.set(true); this.docsError.set(''); this.docSearchResults.set(null);
+    try {
+      const response = await fetch('/api/documents/search', {method:'POST',
+        headers:{'Content-Type':'application/json','X-Project-Id':project,'X-Builder-Token':this.token},
+        body:JSON.stringify({query})});
+      const data = await response.json();
+      if (epoch !== this.projectEpoch || request !== this.searchRequest) return;
+      if (!response.ok) throw new Error(data.message || 'Document search unavailable');
+      this.docSearchResults.set(data.documents); this.docsTruncated.set(data.truncated);
+    } catch(error) {
+      if(epoch === this.projectEpoch && request === this.searchRequest) this.docsError.set(error instanceof Error ? error.message : 'Document search unavailable');
+    } finally {
+      if(epoch === this.projectEpoch && request === this.searchRequest) this.docsSearching.set(false);
+    }
+  }
   async loadDocuments() {
+    this.docSearch = ''; this.documentQueryChanged();
     const project = this.state()?.project.id, epoch = this.projectEpoch;
     if (!project) return;
     this.docsLoading.set(true); this.docsError.set('');
