@@ -43,3 +43,23 @@ Run npm test, npm run test:installer, npm run build and npm run test:ui as relev
 Validate portable template changes with python3 scripts/export-runtime-template.py
 --check. Keep native credentials, session history, private memories and local paths
 out of Git and package artifacts. No commits or pushes unless requested.
+
+After application changes, rebuild and restart the local controller serving
+http://localhost.runtime-controller:10101/ before reporting completion. Verify
+that the URL responds and serves the updated build; source edits alone are not
+enough because start:local does not rebuild or hot-reload. Check for active runs
+or installation work before restarting, preserve project state, and use graceful
+shutdown. If active work prevents a safe restart, report the pending restart
+explicitly rather than claiming the changes are live. Documentation-only changes
+do not require a restart.
+
+When starting or restarting, inspect `.codex/visual-builder/owner.lock` and verify
+the recorded PID's identity, project and listening port. Only one controller may
+own a project. If the existing controller is running, reuse it or, when a restart
+is needed and no work is active, gracefully stop that specific process. Wait for
+it to exit and release its lock and port before starting the replacement. Never
+delete a live process's lock or kill unrelated processes. If a stale lock remains,
+confirm its recorded process is dead and no controller owns the project before
+removing only that stale `owner.lock`. Preserve `state.json` and all user files.
+If ownership cannot be established or graceful shutdown fails, report the blocker
+rather than forcing a restart or removing the lock.

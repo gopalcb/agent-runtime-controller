@@ -567,6 +567,21 @@ sequenceDiagram
 
 ### Optional local hostname
 
+For this checkout on **http://localhost.runtime-controller:10101/**, add the
+machine-local hostname once, then start the controller from the project root:
+
+```bash
+sudo python3 -m installer.host_setup --hosts-only
+npm run start:local
+```
+
+The first command adds `127.0.0.1 localhost.runtime-controller` to `/etc/hosts`
+with a backup. It requires your administrator password. No proxy is needed on
+port 10101. `start:local` uses this checkout as both the application source and
+selected project; build it first with `npm run build` if needed. Stop any existing
+controller on that port before starting. The numeric loopback URL continues to
+work too. The hostname mapping belongs to the machine, not the repository.
+
 The default setup URL is **http://127.0.0.1:10101/controller/install**. To use **http://localhost.runtime-controller:1001**, the hostname must resolve to loopback and port 1001 must be available. Systems that restrict low-numbered ports need an administrator-managed forwarder. The helper keeps the controller unprivileged on port 10101:
 
 ```bash
@@ -641,3 +656,30 @@ The Git ignore file excludes dependencies, build output, archives, local `.codex
 Work Docs lists Markdown at the project root and under `docs/`, `plans/`, `.codex/tasks/`, and `.codex/plans/`, newest first. Refresh to discover files created during a run. Files have no agent-author attribution. The reader formats common Markdown and treats embedded HTML as text. Fenced `mermaid` diagrams render locally with an expandable source view. Invalid diagrams, HTML labels, and diagrams over 50,000 characters retain their source with an error message. Discovery excludes symlinks, dependency folders and other hidden directories, caps traversal at 5,000 entries/depth 8 and the list at 500 documents; files over 512 KiB are excluded.
 
 Active execution appears above Work Items in a fixed-height terminal. New output arrives at the bottom and auto-scrolls; pause auto-scroll to read earlier output. Finished output remains in Run History. Project selection and runtime setup are available only in Settings.
+
+The runtime terminal retains command/output, agent messages, public reasoning summaries, file diffs and tool activity from Codex notices. The workflow above it follows the agent's reported plan, with a spinner for running steps and ticks for completed steps. Until a plan is reported it shows connection/execution lifecycle only. Unconfirmed steps remain pending or stopped when a run ends. New output enters at the bottom; scrolling upward pauses following, and **Follow latest** resumes it. The most recent transcript remains visible after completion and older transcripts are available in Run History. Activity is bounded to 500 items, 30,000 characters per item and 200,000 body characters per run, with a visible trimming notice. Older runs retain their original output; missing historical activity cannot be reconstructed.
+
+Work Docs also supports semantic search: describe the document and press **Enter**.
+Typing alone does not call a model. Results appear in relevance order; clear the field
+or refresh to return to the newest-first list. Loading, no matches and search errors
+are shown in the sidebar/page. Search uses the installed Codex account's model
+catalog, preferring `gpt-6-luna` when advertised, otherwise its advertised default
+(which must support low reasoning effort). Set `RUNTIME_CONTROLLER_SEARCH_MODEL`
+before starting the controller to explicitly select another available model.
+An explicit model is never silently replaced. Model/authentication failures show
+the upstream explanation; changing the account's coding-model settings is unnecessary.
+
+On first use, the bundled `.codex/tools/folder-watcher/watcher.cjs` starts a two-second
+reconciliation loop. It writes `.codex/runtime-controller/documents-index.json` with
+allowed document metadata, headings and excerpts, and refreshes again before search.
+The index includes at most 4,000 excerpt characters per document and 200,000 across
+all documents; search is approximate over those excerpts, not exhaustive full text.
+The JSON index and query are sent to Codex only on submission. Each search uses an
+isolated temporary directory, a read-only ephemeral thread, disabled integrations
+and shell, a 60-second deadline, and at most 20 validated document references.
+Only one search runs per project at a time. Switching projects closes the watcher
+and cancels its search. Search never creates a Work Item execution or changes the
+selected coding model/settings.
+
+`npm run test:docs-ui` checks semantic-search component state and stale responses
+without starting a browser; it does not replace the browser smoke tests.

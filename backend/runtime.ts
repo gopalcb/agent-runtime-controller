@@ -13,6 +13,7 @@ import {
 } from './codex';
 import { DEFAULT_SETTINGS, sandboxPolicy } from './settings';
 import { ProjectStore } from './store';
+import { recordActivity } from './activity';
 import { active, Approval, Run, TokenUsage } from './types';
 
 type TransportFactory = (
@@ -46,6 +47,7 @@ const DEVELOPER_INSTRUCTIONS = [
   'Treat rectangle coordinates as visual layout intent at the recorded viewport; implement responsive layouts.',
   'Do not edit .codex/visual-builder/state.json or owner.lock.',
   'Verify relevant behavior.',
+  'Publish your execution steps with the plan tool before substantial work, and update step statuses as work progresses.',
   'Report changes and actual checks, including blockers.',
   'Do not claim completion when implementation is incomplete.',
 ].join(' ');
@@ -229,12 +231,18 @@ export class Runtime {
       return;
     }
     if (!active(run)) return;
+    const noticeTurn = params.turnId || params.turn?.id;
+    if (run.turnId && noticeTurn && noticeTurn !== run.turnId) return;
+
+    const previousItem = run.activity?.find((entry) => entry.id === params.item?.id);
+    const alreadyCompleted = previousItem && previousItem.status !== 'inProgress';
+    if (recordActivity(run, method, params)) this.store.save();
 
     if (method === 'turn/started') {
       run.turnId = params.turn?.id;
       this.store.save();
     }
-    if (method === 'item/completed' && params.item?.type === 'agentMessage') {
+    if (method === 'item/completed' && params.item?.type === 'agentMessage' && !alreadyCompleted) {
       run.output = (run.output + params.item.text + '\n').slice(-60000);
       this.store.save();
     }
@@ -347,6 +355,9 @@ export class Runtime {
     }
 
     run.status = status;
+    for (const entry of run.activity || []) {
+      if (entry.status === 'inProgress') entry.status = 'interrupted';
+    }
     run.finishedAt = new Date().toISOString();
     if (error) run.error = error;
 

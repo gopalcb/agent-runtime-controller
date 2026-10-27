@@ -158,10 +158,9 @@ export function installLiveOverlay({ origin }: { origin: string }) {
       selectionEvidence = captureEvidence(selectedElement);
       if (selectionEvidence.rect.width < 8 || selectionEvidence.rect.height < 8) return;
       editor.hidden = false;
-      (shadow.querySelector('#name') as HTMLInputElement).value = '';
       (shadow.querySelector('#description') as HTMLTextAreaElement).value = '';
       shadow.querySelector('#error')!.textContent = '';
-      (shadow.querySelector('#name') as HTMLInputElement).focus();
+      (shadow.querySelector('#description') as HTMLTextAreaElement).focus();
     },
     true,
   );
@@ -213,7 +212,7 @@ export function installLiveOverlay({ origin }: { origin: string }) {
       h2{font-size:19px;margin:0 0 20px;font-weight:600}label{display:block;margin:15px 0 8px;font-size:12px}input,textarea{width:100%;padding:11px 12px;border:1px solid #dcd5e8;border-radius:8px;background:#fcfbfe;color:#40354e}textarea{resize:vertical;min-height:100px}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.error{color:#b34455;font-size:12px}.saved-item{border-top:1px solid #eee6f4;padding:14px 0;overflow-wrap:anywhere}.saved-item p{font-size:12px;color:#86778f;line-height:1.6;white-space:pre-wrap}.saved-item code{font-size:10px;color:#8971b0}
       button,.bar,.panel,input,textarea{border-radius:4px}button,.bar button,.primary,.bar button[aria-pressed=true]{background:#24212e;color:#fff;border-color:#5b5669}button{font-size:12px;text-transform:uppercase}.bar button[aria-pressed=true]{outline:2px solid #b6a1ff;outline-offset:1px}.wordmark{letter-spacing:2px;font-size:15px}.saved-item p{color:#51465b}.saved-item code{color:#65478b}textarea{resize:none}
       @media(max-width:650px){.hint,.wordmark{display:none}.bar{gap:6px;padding:10px;bottom:18px}.bar button{font-size:11px;padding:11px 12px}.panel{padding:20px;bottom:96px}}
-    </style><div class="outline" hidden></div><section class="panel editor" role="dialog" aria-modal="true" aria-labelledby="heading" hidden><h2 id="heading">Describe this element</h2><form><label for="name">Region name</label><input id="name" maxlength="160" required autocomplete="off"><label for="description">Instructions</label><textarea id="description" maxlength="12000" required></textarea><p class="error" id="error" role="alert"></p><div class="actions"><button type="button" id="cancel">Cancel</button><button class="primary" type="submit">Save instruction</button></div></form></section><section class="panel saved" aria-label="Saved instructions" hidden><h2>Saved instructions</h2><div id="items"></div></section><div class="bar" role="toolbar" aria-label="Visual instruction tools"><span class="wordmark">RELAY</span><button id="select" aria-pressed="false">Select element</button><button id="browse">Browse</button><button id="saved">Saved (0)</button><span class="hint" role="status">Browse your app</span></div>`;
+    </style><div class="outline" hidden></div><section class="panel editor" role="dialog" aria-modal="true" aria-labelledby="heading" hidden><h2 id="heading">Describe this element</h2><form><label for="description">Instructions</label><textarea id="description" maxlength="12000" required></textarea><p class="error" id="error" role="alert"></p><div class="actions"><button type="button" id="cancel">Cancel</button><button class="primary" type="submit">Save instruction</button></div></form></section><section class="panel saved" aria-label="Saved instructions" hidden><h2>Saved instructions</h2><div id="items"></div></section><div class="bar" role="toolbar" aria-label="Visual instruction tools"><span class="wordmark">RELAY</span><button id="select" aria-pressed="false">Select element</button><button id="browse">Browse</button><button id="saved">Saved (0)</button><span class="hint" role="status">Browse your app</span></div>`;
     document.documentElement.appendChild(host);
     outline = shadow.querySelector('.outline')!;
     editor = shadow.querySelector('.editor')!;
@@ -274,11 +273,11 @@ export function installLiveOverlay({ origin }: { origin: string }) {
       event.preventDefault();
       if (saving || !selectionEvidence) return;
 
-      const title = (shadow.querySelector('#name') as HTMLInputElement).value.trim();
       const description = (
         shadow.querySelector('#description') as HTMLTextAreaElement
       ).value.trim();
-      if (!title || !description) return;
+      if (!description) return;
+      const title = description.replace(/\s+/g, ' ').slice(0, 160);
 
       saving = true;
       editor.querySelectorAll('button').forEach((b) => (b.disabled = true));

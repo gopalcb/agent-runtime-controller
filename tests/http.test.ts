@@ -20,6 +20,16 @@ test('local HTTP API validates token, origin, body, persistence and real state',
     assert.equal((await (await fetch(base+'/api/documents/content?path=plan.md')).json() as any).content,'# API document');
     assert.equal((await fetch(base+'/api/documents/content?path=../secret.md')).status,400);
     assert.equal((await fetch(base+'/api/documents',{headers:{'X-Project-Id':'stale-project'}})).status,409);
+    const searchHeaders={'content-type':'application/json','x-builder-token':data.token,'x-project-id':data.project.id};
+    assert.equal((await fetch(base+'/api/documents/search',{method:'POST',headers:{'content-type':'application/json'},body:'{"query":"release"}'})).status,403);
+    assert.equal((await fetch(base+'/api/documents/search',{method:'POST',headers:{...searchHeaders,'x-project-id':'stale'},body:'{"query":"release"}'})).status,409);
+    assert.equal((await fetch(base+'/api/documents/search',{method:'POST',headers:searchHeaders,body:'{"query":""}'})).status,400);
+    const search=server.projects.session.documents.search;
+    server.projects.session.documents.search=async(query:unknown)=>{assert.equal(query,'shipping software');return {documents:[{path:'plan.md'}],truncated:false};};
+    try {
+      const ranked=await fetch(base+'/api/documents/search',{method:'POST',headers:searchHeaders,body:'{"query":"shipping software"}'});
+      assert.equal(ranked.status,200);assert.equal((await ranked.json() as any).documents[0].path,'plan.md');
+    } finally {server.projects.session.documents.search=search;}
     // Unlike fetch in this environment, raw HTTP sends the supplied Host header.
     const statusWithHeaders = (requestHeaders: Record<string, string>) =>
       new Promise<number | undefined>((resolve, reject) => {

@@ -37,7 +37,8 @@ ALLOWLIST.update(f"tools/ui-testing-and-debugging/{name}" for name in (
     "pointer/PointerOverlay.swift", "pointer/pointer.mjs",
     "pointer/mcp-proxy.mjs", "pointer/pointer.test.mjs",
 ))
-AUTHORED = {"workflows/memory.md"}
+AUTHORED = {"workflows/memory.md", "tools/folder-watcher/watcher.cjs",
+            "tools/folder-watcher/README.md"}
 AUTHORED.update(f"tools/project_memory/{name}" for name in (
     "memory.py", "test_memory.py", "README.md", "ARCHITECTURE.md", "code-map.yaml",
 ))

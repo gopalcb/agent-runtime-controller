@@ -83,6 +83,9 @@ export class ProjectStore {
         : { version: 1, settings: { ...DEFAULT_SETTINGS }, instructions: [], runs: [], events: [] };
       for (const run of this.state.runs.filter(active)) {
         run.status = 'interrupted';
+        for (const entry of run.activity || []) {
+          if (entry.status === 'inProgress') entry.status = 'interrupted';
+        }
         run.finishedAt = new Date().toISOString();
         run.error = 'Server stopped before completion. Inspect project changes before retrying.';
         for (const item of this.state.instructions.filter((i) =>

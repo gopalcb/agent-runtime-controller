@@ -132,6 +132,26 @@
       }
     },
     {
+      "path": "tools/folder-watcher/README.md",
+      "sha256": "b1625c58631ebbf34d2c430b8c2d640b6311356b6f1b94515a3e59bea24018be",
+      "bytes": 850,
+      "provenance": {
+        "source": "runtime-template/.codex/tools/folder-watcher/README.md",
+        "kind": "authored",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
+      "path": "tools/folder-watcher/watcher.cjs",
+      "sha256": "3a8ffcfef015665e9b607def064881db746ea9ed72b6e64953527be0dc6ba8c9",
+      "bytes": 684,
+      "provenance": {
+        "source": "runtime-template/.codex/tools/folder-watcher/watcher.cjs",
+        "kind": "authored",
+        "origin": "GB Systems workspace instructions and generic runtime tooling"
+      }
+    },
+    {
       "path": "tools/project_memory/ARCHITECTURE.md",
       "sha256": "24758195bce3d399f9a30ebe6be885b5ec03798237b556199fa631042f68c9b0",
       "bytes": 954,

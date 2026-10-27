@@ -61,7 +61,7 @@ test('uncertain dispatch never retries or reports success',async()=>{
 });
 test('disconnect, cancellation and restart retain truthful terminal states',async()=>{
   const f=fixture();try{f.store.add(input);const run=f.runtime.execute({});await tick();f.disconnect();assert.equal(run.status,'interrupted');f.store.add(input);const next=f.runtime.execute({});await tick();await f.runtime.cancel(next.id);assert.equal(next.status,'cancelled');assert.equal(f.calls.at(-1)?.method,'turn/interrupt');}finally{f.cleanup();}
-  const root=temp();const store=new ProjectStore(root);const item=store.add(input);item.status='running';store.state.runs.push({id:'r',status:'running',instructionIds:[item.id],instructions:[item],createdAt:new Date().toISOString(),prompt:'',output:''});store.save();store.close();const recovered=new ProjectStore(root);assert.equal(recovered.state.runs[0].status,'interrupted');assert.equal(recovered.state.instructions[0].status,'failed');recovered.close();rmSync(root,{recursive:true,force:true});
+  const root=temp();const store=new ProjectStore(root);const item=store.add(input);item.status='running';store.state.runs.push({id:'r',status:'running',activity:[{id:'cmd',time:'now',kind:'commandExecution',title:'test',text:'running',status:'inProgress'}],instructionIds:[item.id],instructions:[item],createdAt:new Date().toISOString(),prompt:'',output:''});store.save();store.close();const recovered=new ProjectStore(root);assert.equal(recovered.state.runs[0].status,'interrupted');assert.equal(recovered.state.runs[0].activity![0].status,'interrupted');assert.equal(recovered.state.instructions[0].status,'failed');recovered.close();rmSync(root,{recursive:true,force:true});
 });
 
 test('late cancellation response cannot close a subsequent run transport', async () => {
@@ -87,4 +87,36 @@ test('stale lock requires explicit recovery instead of racing another owner', ()
   const root=temp();mkdirSync(join(root,'.codex','visual-builder'),{recursive:true});
   const lock=join(root,'.codex','visual-builder','owner.lock');const content=JSON.stringify({pid:2147483647,id:'stale'});writeFileSync(lock,content);
   try{assert.throws(()=>new ProjectStore(root),/Stale builder lock/);assert.equal(readFileSync(lock,'utf8'),content);}finally{rmSync(root,{recursive:true,force:true});}
+});
+
+test('activity streams commands, messages, edits and plans without duplicate final output', async () => {
+  const f = fixture();
+  try {
+    f.store.add(input); const run = f.runtime.execute({}); await tick();
+    const emit = (method: string, params: any) => f.notice(method, {threadId: 'thread-1', turnId: 'turn-1', ...params});
+    emit('turn/plan/updated', {plan: [{step:'Inspect',status:'completed'},{step:'Implement',status:'inProgress'},{step:'Verify',status:'pending'}]});
+    emit('item/started', {item:{id:'command',type:'commandExecution',command:'npm test',cwd:'/fixture'}});
+    emit('item/commandExecution/outputDelta', {itemId:'command',delta:'first\n'});
+    emit('item/commandExecution/outputDelta', {itemId:'command',delta:'second\n'});
+    assert.equal(run.activity![0].text,'first\nsecond\n');
+    emit('item/completed', {item:{id:'command',type:'commandExecution',command:'npm test',aggregatedOutput:'first\nsecond\n',exitCode:0,status:'completed'}});
+    emit('item/agentMessage/delta',{itemId:'message',delta:'Hello '});
+    emit('item/agentMessage/delta',{itemId:'message',delta:'world'});
+    emit('item/completed',{item:{id:'message',type:'agentMessage',text:'Hello world'}});
+    emit('item/completed',{item:{id:'message',type:'agentMessage',text:'Hello world'}});
+    assert.equal(run.output,'Hello world\n'); assert.equal(run.activity!.length,2);
+    emit('item/completed',{item:{id:'edit',type:'fileChange',status:'completed',changes:[{path:'src/app.ts',kind:{type:'update'},diff:'+ added'}]}});
+    assert.match(run.activity![2].text,/src\/app.ts\n\+ added/);
+    emit('item/mcpToolCall/progress',{itemId:'tool',message:'Reading docs'});
+    emit('item/agentMessage/delta',{threadId:'other',itemId:'bad',delta:'wrong project'});
+    emit('item/agentMessage/delta',{turnId:'other',itemId:'bad',delta:'wrong turn'});
+    assert.equal(run.activity!.length,4);
+    emit('turn/completed',{turn:{id:'turn-1',status:'completed'}});
+    assert.equal(run.activity![3].status,'interrupted');
+    assert.equal(run.plan![1].status,'inProgress'); // Never fabricate completion.
+    emit('item/agentMessage/delta',{itemId:'late',delta:'late'});
+    assert.equal(run.activity!.length,4);
+    const persisted=JSON.parse(readFileSync(join(f.root,'.codex','visual-builder','state.json'),'utf8'));
+    assert.deepEqual(persisted.runs[0].activity,run.activity);
+  } finally {f.cleanup();}
 });
