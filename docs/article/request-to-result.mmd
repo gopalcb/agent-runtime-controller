@@ -1,0 +1,24 @@
+flowchart TD
+  A["1. Capture and describe a change"]
+  B["2. Save a visual instruction"]
+  C["3. Validate selection and snapshot inputs"]
+  D["4. Start Codex in the selected project"]
+  E["5. Process messages, status and usage"]
+  F["6. Review the saved result in the UI"]
+  S[("state.json<br/>Instructions · runs · events · settings")]
+  W["Application files"]
+  A -->|POST /api/instructions| B
+  B -->|POST /api/execute| C
+  C -->|thread/start + turn/start| D
+  D -->|Notifications| E
+  E -->|Save output and status| S
+  B -. Save instruction .-> S
+  C -. Save snapshot .-> S
+  D -->|Edit directly| W
+  S -->|GET /api/state every 2 seconds| F
+  classDef step fill:#fbfaf7,stroke:#8da699,color:#26322f,stroke-width:1px;
+  classDef store fill:#e7efe9,stroke:#49725e,color:#214b3d,stroke-width:1.5px;
+  classDef workspace fill:#f5f0e5,stroke:#a38c61,color:#594720;
+  class A,B,C,D,E,F step;
+  class S store;
+  class W workspace;
