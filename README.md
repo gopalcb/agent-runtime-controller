@@ -683,3 +683,7 @@ selected coding model/settings.
 
 `npm run test:docs-ui` checks semantic-search component state and stale responses
 without starting a browser; it does not replace the browser smoke tests.
+
+## License
+
+Licensed under the [MIT License](LICENSE).
